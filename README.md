@@ -4,7 +4,7 @@
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10+-green.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)]()
+[![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 
 ---
 
@@ -12,12 +12,13 @@
 
 | Module | Description |
 |---|---|
-| **customer-profile** | 客户画像数据处理、Enrichment 引擎、CRUD 服务与 REST API |
-| **recommendation-engine** | 协同过滤、基于内容、混合推荐引擎，支持模型版本化与 A/B 测试 |
-| **marketing-automation** | 工作流编排引擎、活动模板管理、A/B 测试活动支持 |
-| **analytics-dashboard** | 指标计算、报告生成、WebSocket 实时数据面板 |
-| **api** | API 网关、JWT 认证、CORS、API Key 管理 |
-| **shared** | 配置管理、缓存、错误处理、日志工具集 |
+| **customer-profile/** | 客户画像数据处理、Enrichment 引擎、CRUD 服务与 REST API |
+| **recommendation-engine/** | 协同过滤、基于内容、混合推荐引擎，支持模型版本化与 A/B 测试 |
+| **marketing-automation/** | 工作流编排引擎、活动模板管理、A/B 测试活动支持 |
+| **analytics-dashboard/** | 指标计算、报告生成、WebSocket 实时数据面板 |
+| **api/** | API 网关、JWT 认证、CORS、API Key 管理 |
+| **shared/** | 配置管理、缓存、错误处理、日志工具集 |
+| **scripts/** | 运行脚本、测试脚本、种子数据生成 |
 
 ## 🚀 Quick Start
 
@@ -79,12 +80,14 @@ bash scripts/run.sh
 
 ## 📜 Version History
 
-| Version | Date | Highlights |
-|---|---|---|
-| **v1.0.0** | 2024-06-20 | Production-ready: ML upgrade, compliance, automation enhancement |
-| **v0.3.0** | 2024-05-25 | Dashboard, integration tests, performance optimization |
-| **v0.2.0** | 2024-05-08 | Integration layer, auth, stability fixes |
-| **v0.1.0** | 2024-04-08 | Initial foundation: profiles, recommendations, campaigns, analytics |
+| Version | Date | Highlights | Tag |
+|---|---|---|---|
+| **v1.0.0** | 2026-05-04 | 🎯 正式发布 — 生产级 AI 营销平台，GDPR 合规模块 | `v1.0.0` |
+| **v0.3.0** | 2024-11-18 | 📊 仪表盘 & 性能优化、WebSocket 实时刷新 | `v0.3.0` |
+| **v0.2.0** | 2024-07-15 | 🔐 集成层 & 认证（JWT、API Key、RBAC） | `v0.2.0` |
+| **v0.1.0** | 2024-04-08 | 🚀 初始版本 — 基础架构搭建 | `v0.1.0` |
+
+完整变更日志见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 🧪 Testing
 
