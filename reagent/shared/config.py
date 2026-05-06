@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import warnings
 from pathlib import Path
 from typing import Optional
 
@@ -16,7 +17,7 @@ class Settings(BaseSettings):
     app_name: str = "ReAgent"
     debug: bool = False
     api_prefix: str = "/api/v1"
-    cors_origins: list[str] = ["*"]
+    cors_origins: list[str] = ["http://localhost:3000", "http://localhost:8000"]
     log_level: str = "INFO"
 
     # --- Storage ---
@@ -48,13 +49,32 @@ class Settings(BaseSettings):
     banner_default_height: int = 628
 
     # --- Security ---
-    jwt_secret: str = "change-me-in-production"
+    jwt_secret: str = ""
     jwt_algorithm: str = "HS256"
 
     model_config = SettingsConfigDict(env_file=".env", env_prefix="REAGENT_")
 
 
 settings = Settings()
+
+# Validate JWT secret
+if not settings.jwt_secret:
+    warnings.warn(
+        "REAGENT_JWT_SECRET is not set! Using auto-generated secret (will change on restart). "
+        "Set REAGENT_JWT_SECRET in .env or environment variables.",
+        RuntimeWarning,
+        stacklevel=2,
+    )
+    import secrets
+    settings.jwt_secret = secrets.token_hex(32)
+
+if settings.debug and settings.jwt_secret == "change-me-in-production":
+    warnings.warn(
+        "WARNING: JWT secret is set to default value 'change-me-in-production'. "
+        "Set REAGENT_JWT_SECRET in .env or environment variables.",
+        RuntimeWarning,
+        stacklevel=2,
+    )
 
 # Ensure output directory exists
 Path(settings.content_output_dir).mkdir(parents=True, exist_ok=True)

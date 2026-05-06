@@ -12,6 +12,7 @@ from loguru import logger
 from reagent.shared.config import settings
 from reagent.shared.errors import ReAgentError
 from reagent.shared.logging import setup_logging
+from reagent.api.auth import jwt_auth_middleware
 from reagent.api.v1 import v1_router
 
 
@@ -48,6 +49,9 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    # JWT Authentication Middleware (runs after CORS, before routes)
+    app.middleware("http")(jwt_auth_middleware)
 
     # Routers
     app.include_router(v1_router)

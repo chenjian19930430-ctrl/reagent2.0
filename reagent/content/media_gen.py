@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import subprocess
 import uuid
 from pathlib import Path
 from typing import Optional
@@ -111,22 +110,30 @@ class MediaAssembler:
         }
         xy = pos_map.get(position, pos_map["center"])
 
+        # SAFETY: Use drawtext textfile instead of inline text to prevent
+        # command injection via user-provided text content.
+        text_file = self._output_dir / f"text_content_{uuid.uuid4().hex[:8]}.txt"
+        text_file.write_text(text, encoding="utf-8")
+
         cmd = [
             self._ffmpeg_path,
             "-i", video_path,
-            "-vf", f"drawtext=text='{text}':fontsize=48:fontcolor=white:x={xy}:y={xy}:shadowy=2",
+            "-vf", f"drawtext=textfile={text_file}:fontsize=48:fontcolor=white:x={xy}:y={xy}:shadowy=2",
             "-c:a", "copy",
             "-y",
             output_path,
         ]
 
-        logger.info(f"Running FFmpeg overlay: {' '.join(cmd)}")
+        logger.info("Running FFmpeg overlay (textfile mode)")
         proc = await asyncio.create_subprocess_exec(
             *cmd,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
         _, stderr = await proc.communicate()
+
+        # Clean up temp text file
+        text_file.unlink(missing_ok=True)
 
         if proc.returncode != 0:
             logger.error(f"FFmpeg overlay failed: {stderr.decode()}")

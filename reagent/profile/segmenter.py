@@ -119,10 +119,35 @@ class Segmenter:
         return True
 
     def _get_metric(self, profile: UserProfile, metric: str):
-        """Extract a metric value from profile."""
+        """Extract a metric value from profile.
+
+        Supports all UserProfile scalar fields plus dynamic trait/tag lookups.
+        """
         mapping = {
+            # Core numeric metrics
             "total_spent": profile.lifetime_value,
+            "lifetime_value": profile.lifetime_value,
             "engagement": profile.engagement_score,
+            "engagement_score": profile.engagement_score,
             "churn_risk": profile.churn_risk,
+            "churn": profile.churn_risk,
+            # Derived / common aliases
+            "repeat_purchase_90d": profile.traits.get("repeat_purchase_90d", 0),
+            "new_product_view_ratio": profile.traits.get("new_product_view_ratio", 0.0),
+            "monthly_study_hours": profile.traits.get("monthly_study_hours", 0),
+            "daily_active_hours": profile.traits.get("daily_active_hours", 0),
+            "reg_days": profile.traits.get("reg_days", 999),
+            "role": profile.traits.get("role", ""),
+            # Preferences
+            "preferred_category": profile.preferences.get("category", ""),
+            "preferred_channel": profile.preferences.get("channel", ""),
+            # Tags
+            "tags": profile.tags,
         }
-        return mapping.get(metric)
+
+        # Fallback: try traits dict if not in standard mapping
+        value = mapping.get(metric)
+        if value is None:
+            value = profile.traits.get(metric)
+
+        return value
