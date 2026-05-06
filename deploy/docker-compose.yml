@@ -1,0 +1,111 @@
+# =============================================================================
+# ReAgent · Docker Compose
+# Development & Production profiles
+# =============================================================================
+
+version: "3.9"
+
+x-reagent-common: &reagent-common
+  build:
+    context: ..
+    dockerfile: deploy/Dockerfile
+  image: reagent:2.0.0
+  restart: unless-stopped
+  volumes:
+    - reagent_outputs:/app/outputs
+    - reagent_data:/app/data
+  env_file:
+    - ../.env
+  depends_on:
+    redis:
+      condition: service_started
+  networks:
+    - reagent-net
+
+services:
+  # ── ReAgent API ──────────────────────────────────────────────────────────
+  api:
+    <<: *reagent-common
+    container_name: reagent-api
+    ports:
+      - "${REAGENT_API_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    profiles:
+      - dev
+      - prod
+
+  # ── Redis (cache / session / rate-limit) ─────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: reagent-redis
+    restart: unless-stopped
+    ports:
+      - "${REAGENT_REDIS_HOST_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    profiles:
+      - dev
+      - prod
+    networks:
+      - reagent-net
+
+  # ── (Optional) PostgreSQL — for production persistence ──────────────────
+  # Uncomment when migrating from SQLite to PostgreSQL
+  # postgres:
+  #   image: postgres:16-alpine
+  #   container_name: reagent-postgres
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: ${REAGENT_PG_USER:-reagent}
+  #     POSTGRES_PASSWORD: ${REAGENT_PG_PASSWORD:-reagent_secret}
+  #     POSTGRES_DB: ${REAGENT_PG_DB:-reagent}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U reagent"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   profiles:
+  #     - prod
+  #   networks:
+  #     - reagent-net
+
+  # ── Nginx (production reverse proxy) ─────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: reagent-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - reagent_outputs:/app/outputs:ro
+    depends_on:
+      - api
+    profiles:
+      - prod
+    networks:
+      - reagent-net
+
+volumes:
+  reagent_outputs:
+  reagent_data:
+  redis_data:
+  # postgres_data:   # Uncomment if using PostgreSQL
+
+networks:
+  reagent-net:
+    name: reagent-net
+    driver: bridge

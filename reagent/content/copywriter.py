@@ -20,7 +20,7 @@ class Copywriter:
 
     TONE_PROMPTS = {
         CopywritingTone.PROFESSIONAL: "专业、严谨、数据驱动的语调。使用行业术语，突出ROI。",
-        CopywritingTone.FRIENDLY: "友好、亲切的语调，像朋友在聊天。使用"你"而不是"您"。",
+        CopywritingTone.FRIENDLY: '友好、亲切的语调，像朋友在聊天。使用「你」而不是「您」。',
         CopywritingTone.URGENT: "紧迫感、稀缺性驱动的语调，强调限时优惠。",
         CopywritingTone.LUXURY: "高端、优雅的语调，强调品质和独特性。",
         CopywritingTone.CASUAL: "随意、轻松的语调，使用口语化表达。",

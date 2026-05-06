@@ -54,7 +54,7 @@ class CopywritingResponse(BaseModel):
 
 class BannerRequest(BaseModel):
     """Request to generate a banner image."""
-    copy: str
+    copy_text: str = Field(default="", validation_alias="copy")
     headline: str
     brand_name: str = ""
     format: BannerFormat = BannerFormat.LANDSCAPE
@@ -85,7 +85,7 @@ class ContentGenerationRequest(BaseModel):
 class ContentGenerationResponse(BaseModel):
     """Unified response for content generation."""
     campaign_id: str = ""
-    copy: Optional[CopywritingResponse] = None
+    copy_result: Optional[CopywritingResponse] = Field(default=None, validation_alias="copy")
     banner: Optional[BannerResponse] = None
     landing_page_html: Optional[str] = None
     ai_provider: str = ""

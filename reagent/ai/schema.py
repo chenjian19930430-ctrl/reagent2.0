@@ -44,8 +44,7 @@ class ModelRequest(BaseModel):
     stream: bool = False
     tools: Optional[list[dict]] = None
 
-    class Config:
-        use_enum_values = False
+    model_config = {"use_enum_values": False}
 
 
 class ModelResponse(BaseModel):

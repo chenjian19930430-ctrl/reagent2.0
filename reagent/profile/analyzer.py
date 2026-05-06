@@ -139,9 +139,9 @@ class ProfileAnalyzer:
         )
         # We need to include user data in a different way
         # Create a modified request with user message
-        import copy
+        from copy import deepcopy
         from reagent.ai.schema import Message, MessageRole
-        enhanced_request = copy.deepcopy(ai_request)
+        enhanced_request = deepcopy(ai_request)
         enhanced_request.messages.append(
             Message(role=MessageRole.USER, content=f"请分析以下用户数据：\n{user_data}")
         )

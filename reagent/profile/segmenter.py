@@ -69,9 +69,11 @@ class Segmenter:
         self._templates = INDUSTRY_TEMPLATES
         logger.info(f"Segmenter initialized with {len(self._templates)} industry templates")
 
-    def get_template(self, industry: IndustryType) -> IndustryTemplate:
+    def get_template(self, industry: object) -> IndustryTemplate:
         """Get industry-specific template."""
-        return self._templates.get(industry, self._templates[IndustryType.GENERAL])
+        if isinstance(industry, IndustryType):
+            return self._templates.get(industry, self._templates[IndustryType.GENERAL])
+        return self._templates[IndustryType.GENERAL]
 
     def list_templates(self) -> list[dict]:
         """List all available industry templates."""

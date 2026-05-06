@@ -1,4 +1,4 @@
-"""Banner image generation module — FFmpeg-based assembly (Phase 1 MVP)."""
+"""Banner image generation module — PIL-based assembly (Phase 1 MVP)."""
 
 from __future__ import annotations
 
@@ -57,18 +57,20 @@ class BannerGenerator:
 
     def _render_image(self, request: BannerRequest, width: int, height: int) -> Path:
         """Render banner image using PIL."""
+        primary_rgb = self._hex_to_rgb(request.primary_color)
+
         # Create background
-        img = Image.new("RGB", (width, height), self._hex_to_rgb(request.primary_color))
+        img = Image.new("RGB", (width, height), primary_rgb)
         draw = ImageDraw.Draw(img)
 
         # Draw gradient overlay (if gradient)
         if request.background_type == "gradient":
-            secondary = self._hex_to_rgb(request.secondary_color)
+            secondary_rgb = self._hex_to_rgb(request.secondary_color)
             for y in range(height):
                 ratio = y / height
-                r = int(request.primary_color_rgb[0] * (1 - ratio) + secondary[0] * ratio)
-                g = int(request.primary_color_rgb[1] * (1 - ratio) + secondary[1] * ratio)
-                b = int(request.primary_color_rgb[2] * (1 - ratio) + secondary[2] * ratio)
+                r = int(primary_rgb[0] * (1 - ratio) + secondary_rgb[0] * ratio)
+                g = int(primary_rgb[1] * (1 - ratio) + secondary_rgb[1] * ratio)
+                b = int(primary_rgb[2] * (1 - ratio) + secondary_rgb[2] * ratio)
                 draw.line([(0, y), (width, y)], fill=(r, g, b))
 
         # Draw headline text (centered)
@@ -98,7 +100,7 @@ class BannerGenerator:
         except (IOError, OSError):
             copy_font = ImageFont.load_default()
 
-        body = request.copy[:100]
+        body = (request.copy_text or request.headline)[:100]
         copy_bbox = draw.textbbox((0, 0), body, font=copy_font)
         copy_width = copy_bbox[2] - copy_bbox[0]
         copy_x = (width - copy_width) // 2
@@ -115,17 +117,14 @@ class BannerGenerator:
 
         return output_path
 
-    def _hex_to_rgb(self, hex_color: str) -> tuple[int, int, int]:
-        """Convert hex color string to RGB tuple."""
+    @staticmethod
+    def _hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
+        """Convert hex color string to RGB tuple.
+        Handles #RGB and #RRGGBB formats.
+        """
         hex_color = hex_color.lstrip("#")
-        rgb = tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
-        self._primary_color_rgb_cache = rgb
-        return rgb
-
-    @property
-    def _primary_color_rgb_cache(self):
-        return getattr(self, "__color_cache", (26, 115, 232))
-
-    @_primary_color_rgb_cache.setter
-    def _primary_color_rgb_cache(self, value):
-        self.__color_cache = value
+        if len(hex_color) == 3:
+            hex_color = "".join(c * 2 for c in hex_color)
+        if len(hex_color) < 6:
+            hex_color = hex_color.ljust(6, "0")
+        return tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4))

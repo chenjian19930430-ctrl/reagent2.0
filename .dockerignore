@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+
+# Environment (secrets — never copy into image!)
+.env
+.env.*
+!deploy/.env.dev
+!deploy/.env.test
+!deploy/.env.prod
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# Build artifacts
+node_modules/

@@ -48,7 +48,7 @@ class ContentPipeline:
         if request.copywriting:
             logger.info("Pipeline stage 1/3: Copywriting generation")
             copy = await self._copywriter.generate(request.copywriting)
-            response.copy = copy
+            response.copy_result = copy
 
             # Stage 3: Landing page (if copy exists and content type matches)
             if request.content_type == ContentType.LANDING_PAGE and copy:
@@ -73,7 +73,7 @@ class ContentPipeline:
         response = ContentGenerationResponse(campaign_id=request.campaign_id)
         if request.copywriting:
             copy = await self._copywriter.generate(request.copywriting)
-            response.copy = copy
+            response.copy_result = copy
         return response
 
     async def generate_full(self, request: ContentGenerationRequest) -> ContentGenerationResponse:

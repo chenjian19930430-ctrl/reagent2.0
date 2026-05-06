@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from loguru import logger
 
 from reagent.shared.config import settings
+from reagent.shared.errors import ReAgentError
 from reagent.shared.logging import setup_logging
 from reagent.api.v1 import v1_router
 
@@ -49,6 +51,20 @@ def create_app() -> FastAPI:
 
     # Routers
     app.include_router(v1_router)
+
+    # Global exception handlers
+    @app.exception_handler(ReAgentError)
+    async def reagent_exception_handler(request: Request, exc: ReAgentError) -> JSONResponse:
+        logger.error(f"ReAgentError [{exc.code}]: {exc.message}")
+        return JSONResponse(status_code=exc.http_status, content=exc.to_dict())
+
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+        logger.error(f"Unhandled exception: {exc}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "INTERNAL_ERROR", "message": str(exc)},
+        )
 
     return app
 
