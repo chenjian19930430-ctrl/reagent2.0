@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReAgent · 智能营销平台 · 原型</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --primary:#6366f1; --primary-light:#818cf8; --primary-dark:#4f46e5; --primary-bg:#eef2ff;
+    --success:#10b981; --warning:#f59e0b; --danger:#ef4444; --info:#3b82f6;
+    --bg:#f8fafc; --card:#fff; --text:#1e293b; --text-secondary:#64748b; --text-muted:#94a3b8;
+    --border:#e2e8f0; --border-light:#f1f5f9;
+    --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+    --shadow-md:0 4px 6px -1px rgba(0,0,0,.07),0 2px 4px -1px rgba(0,0,0,.04);
+    --shadow-lg:0 10px 15px -3px rgba(0,0,0,.08),0 4px 6px -2px rgba(0,0,0,.04);
+    --radius:8px; --radius-lg:12px; --radius-xl:16px; --sidebar-w:240px; --header-h:56px;
+    --transition:.2s ease;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.5;height:100vh;overflow:hidden}
+  a{color:var(--primary);text-decoration:none}
+  input,select,button,textarea{font-family:inherit;font-size:inherit}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border:none;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;transition:all var(--transition)}
+  .btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+  .btn-block{width:100%;padding:12px}.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}
+  .btn-outline:hover{background:var(--bg);border-color:var(--text-muted)}.btn-sm{padding:6px 12px;font-size:12px}
+  .btn-xs{padding:4px 8px;font-size:11px;border-radius:4px}
+  .btn-success{background:var(--success);color:#fff}.btn-danger{background:var(--danger);color:#fff}.btn-warning{background:var(--warning);color:#fff}
+  .tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+  .tag-blue{background:#dbeafe;color:#1d4ed8}.tag-green{background:#d1fae5;color:#065f46}.tag-purple{background:#ede9fe;color:#5b21b6}
+  .tag-orange{background:#fed7aa;color:#9a3412}.tag-red{background:#fee2e2;color:#991b1b}.tag-teal{background:#ccfbf1;color:#115e59}.tag-gray{background:#f1f5f9;color:#475569}
+
+  /* Login Page */
+  .login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);position:relative}
+  .login-page::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
+  .login-card{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:var(--radius-xl);padding:48px 40px;width:400px;max-width:90vw;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);position:relative}
+  .login-logo{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .login-logo svg{width:32px;height:32px}
+  .login-logo span{font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--primary),#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .login-card h1{font-size:24px;font-weight:700;margin-bottom:4px;color:var(--text)}
+  .login-card p{font-size:14px;color:var(--text-secondary);margin-bottom:28px}
+  .login-form .form-group{margin-bottom:18px}
+  .login-form label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text)}
+  .login-form input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:14px;transition:border-color var(--transition);outline:none}
+  .login-form input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-bg)}
+  .login-form .input-with-icon{position:relative}
+  .login-form .input-with-icon input{padding-left:38px}
+  .login-form .input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);width:18px;height:18px}
+  .login-options{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;font-size:13px}
+  .login-options label{display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-secondary)}
+  .login-options a{color:var(--primary);font-weight:500}
+  .login-footer{text-align:center;margin-top:24px;font-size:13px;color:var(--text-secondary)}
+  .login-error{display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:var(--radius);padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--danger)}
+
+  /* App layout */
+  .app-layout{display:none;height:100vh}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100}
+  .sidebar-header{display:flex;align-items:center;gap:8px;padding:14px 20px;border-bottom:1px solid var(--border);min-height:var(--header-h)}
+  .sidebar-header svg{width:24px;height:24px;flex-shrink:0}
+  .sidebar-header span{font-size:16px;font-weight:700;background:linear-gradient(135deg,var(--primary),#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .sidebar-nav{flex:1;overflow-y:auto;padding:12px 10px}
+  .sidebar-nav .nav-section{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;padding:16px 12px 6px}
+  .sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius);cursor:pointer;font-size:14px;color:var(--text-secondary);transition:all var(--transition);margin-bottom:2px}
+  .sidebar-nav .nav-item:hover{background:var(--primary-bg);color:var(--primary)}
+  .sidebar-nav .nav-item.active{background:var(--primary-bg);color:var(--primary);font-weight:600}
+  .sidebar-nav .nav-item svg{width:18px;height:18px;flex-shrink:0}
+  .sidebar-nav .nav-item .badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
+  .sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;font-size:13px}
+  .sidebar-footer .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0}
+  .sidebar-footer .user-info{flex:1;overflow:hidden}
+  .sidebar-footer .user-name{font-weight:600;font-size:13px;color:var(--text)}
+  .sidebar-footer .user-role{font-size:11px;color:var(--text-muted)}
+  .sidebar-footer .logout-btn{cursor:pointer;color:var(--text-muted);transition:color var(--transition);padding:4px}
+  .sidebar-footer .logout-btn:hover{color:var(--danger)}
+
+  /* Main Content */
+  .main-content{margin-left:var(--sidebar-w);display:flex;flex-direction:column;height:100vh}
+  .topbar{height:var(--header-h);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;background:var(--card);gap:12px;flex-shrink:0}
+  .topbar .page-title{font-size:16px;font-weight:700;flex:1}
+  .topbar .search-box{position:relative;width:240px}
+  .topbar .search-box input{width:100%;padding:6px 12px 6px 32px;border:1px solid var(--border);border-radius:20px;font-size:13px;outline:none;background:var(--bg);transition:all var(--transition)}
+  .topbar .search-box input:focus{border-color:var(--primary);width:280px}
+  .topbar .search-box svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-muted)}
+  .topbar-actions{display:flex;gap:8px;align-items:center}
+  .topbar-actions .icon-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:none;background:transparent;cursor:pointer;color:var(--text-secondary);position:relative;transition:background var(--transition)}
+  .topbar-actions .icon-btn:hover{background:var(--bg)}
+  .topbar-actions .icon-btn .dot{width:6px;height:6px;border-radius:50%;background:var(--danger);position:absolute;top:8px;right:8px}
+  .page-container{flex:1;overflow-y:auto;padding:24px}
+  .page{display:none}
+  .page.active{display:block}
+
+  /* Dashboard */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px}
+  .stat-card{background:var(--card);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border-light)}
+  .stat-card .stat-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .stat-card .stat-label{font-size:13px;color:var(--text-secondary);font-weight:500}
+  .stat-card .stat-icon{width:36px;height:36px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center}
+  .stat-card .stat-value{font-size:28px;font-weight:700;line-height:1.2}
+  .stat-card .stat-change{font-size:12px;margin-top:4px;display:flex;align-items:center;gap:4px}
+  .stat-card .stat-change.up{color:var(--success)}.stat-card .stat-change.down{color:var(--danger)}
+  .chart-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px}
+  .chart-card{background:var(--card);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border-light)}
+  .chart-card .chart-title{font-size:14px;font-weight:600;margin-bottom:16px}
+  .recent-activity{background:var(--card);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border-light)}
+  .recent-activity .activity-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .recent-activity .activity-header h3{font-size:14px;font-weight:600}
+  .activity-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-light)}
+  .activity-item:last-child{border-bottom:none}
+  .activity-dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0}
+  .activity-dot.success{background:var(--success)}.activity-dot.warning{background:var(--warning)}.activity-dot.info{background:var(--info)}.activity-dot.danger{background:var(--danger)}
+  .activity-content{flex:1}
+  .activity-content .act-text{font-size:13px;color:var(--text)}
+  .activity-content .act-time{font-size:11px;color:var(--text-muted);margin-top:2px}
+  .bar-chart{display:flex;align-items:flex-end;gap:6px;height:180px;padding:10px 0}
+  .bar-chart .bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .bar-chart .bar-inner{width:100%;border-radius:4px 4px 0 0;min-height:4px;transition:height .6s ease}
+  .bar-chart .bar-label{font-size:10px;color:var(--text-muted);white-space:nowrap}
+  .bar-chart .bar-value{font-size:10px;color:var(--text-secondary);font-weight:600}
+  .donut-chart{display:flex;align-items:center;justify-content:center;gap:24px;padding:10px 0}
+  .donut-visual{position:relative;width:140px;height:140px}
+  .donut-visual svg{transform:rotate(-90deg)}
+  .donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .donut-center .num{font-size:22px;font-weight:700}
+  .donut-center .label{font-size:11px;color:var(--text-muted)}
+  .donut-legend{display:flex;flex-direction:column;gap:6px}
+  .donut-legend .legend-item{display:flex;align-items:center;gap:8px;font-size:12px}
+  .donut-legend .legend-color{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+  /* Content Generation */
+  .content-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .content-panel{background:var(--card);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border-light)}
+  .content-panel h3{font-size:14px;font-weight:600;margin-bottom:16px}
+  .content-form .form-group{margin-bottom:14px}
+  .content-form label{display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text-secondary)}
+  .content-form select,.content-form textarea,.content-form input{width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;outline:none;transition:border-color var(--transition)}
+  .content-form select:focus,.content-form textarea:focus,.content-form input:focus{border-color:var(--primary)}
+  .content-form textarea{resize:vertical;min-height:80px}
+  .content-form .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .result-card{background:var(--bg);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+  .result-card .result-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px}
+  .result-card .result-text{font-size:14px;color:var(--text);line-height:1.6}
+  .result-card .result-meta{display:flex;gap:12px;margin-top:10px;font-size:11px;color:var(--text-muted)}
+  .result-card .result-actions{display:flex;gap:6px;margin-top:10px}
+  .result-banner{width:100%;height:140px;border-radius:var(--radius);background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:700;margin-bottom:8px}
+
+  /* User Profile/Segmentation */
+  .segment-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+  .segment-filters{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .segment-filters select,.segment-filters input{padding:6px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;outline:none;background:var(--card)}
+  .segment-table{width:100%;border-collapse:collapse;background:var(--card);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border-light)}
+  .segment-table th{text-align:left;padding:12px 16px;font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;background:var(--bg);border-bottom:1px solid var(--border)}
+  .segment-table td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border-light);vertical-align:middle}
+  .segment-table tr:last-child td{border-bottom:none}
+  .segment-table tr:hover td{background:var(--primary-bg)}
+  .segment-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+  .summary-card{background:var(--card);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);border:1px solid var(--border-light);text-align:center}
+  .summary-card .num{font-size:22px;font-weight:700}
+  .summary-card .label{font-size:11px;color:var(--text-muted);margin-top:4px}
+
+  /* Automation Rules */
+  .rules-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .rules-list{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);border:1px solid var(--border-light);overflow:hidden}
+  .rules-list-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+  .rules-list-header h3{font-size:14px;font-weight:600}
+  .rule-item{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border-light);cursor:pointer;transition:background var(--transition)}
+  .rule-item:last-child{border-bottom:none}.rule-item:hover{background:var(--primary-bg)}
+  .rule-item .rule-toggle{position:relative;width:36px;height:20px;flex-shrink:0;border-radius:10px;border:none;cursor:pointer;transition:background var(--transition)}
+  .rule-item .rule-toggle.on{background:var(--success)}.rule-item .rule-toggle.off{background:var(--border)}
+  .rule-item .rule-toggle::after{content:'';position:absolute;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left var(--transition);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+  .rule-item .rule-toggle.on::after{left:18px}.rule-item .rule-toggle.off::after{left:2px}
+  .rule-item .rule-info{flex:1;min-width:0}
+  .rule-item .rule-name{font-size:13px;font-weight:600}
+  .rule-item .rule-desc{font-size:12px;color:var(--text-secondary);margin-top:1px}
+  .rule-item .rule-status{font-size:11px;color:var(--text-muted);white-space:nowrap}
+  .rule-editor{background:var(--card);border-radius:var(--radius-lg);box-shadow:var(--shadow);border:1px solid var(--border-light);padding:20px}
+  .rule-editor h3{font-size:14px;font-weight:600;margin-bottom:16px}
+  .editor-section{margin-bottom:16px}
+  .editor-section label{display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px}
+  .editor-section select,.editor-section input,.editor-section textarea{width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;outline:none}
+  .condition-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+  .condition-row select,.condition-row input{padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;outline:none}
+  .condition-row .logic-badge{background:var(--primary-bg);color:var(--primary);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+  .action-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;padding:10px 12px;background:var(--bg);border-radius:var(--radius);font-size:13px}
+  .action-row .action-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .editor-actions{display:flex;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+
+  /* API Settings */
+  .settings-layout{max-width:720px}
+  .settings-section{background:var(--card);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);border:1px solid var(--border-light);margin-bottom:16px}
+  .settings-section h3{font-size:14px;font-weight:600;margin-bottom:4px}
+  .settings-section .section-desc{font-size:12px;color:var(--text-secondary);margin-bottom:14px}
+  .api-key-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg);border-radius:var(--radius);margin-bottom:8px}
+  .api-key-row .key-name{font-size:13px;font-weight:600;min-width:100px}
+  .api-key-row .key-value{font-family:'SF Mono',Consolas,monospace;font-size:12px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .api-key-row .key-actions{display:flex;gap:4px;flex-shrink:0}
+  .settings-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border-light)}
+  .settings-row:last-child{border-bottom:none}
+  .settings-row .setting-label{font-size:13px}
+  .settings-row .setting-desc{font-size:11px;color:var(--text-muted)}
+  .settings-row .setting-control select,.settings-row .setting-control input{max-width:200px;padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;outline:none}
+  .toggle-switch{position:relative;width:40px;height:22px;border-radius:11px;border:none;cursor:pointer;transition:background var(--transition)}
+  .toggle-switch.on{background:var(--success)}.toggle-switch.off{background:var(--border)}
+  .toggle-switch::after{content:'';position:absolute;top:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left var(--transition);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+  .toggle-switch.on::after{left:20px}.toggle-switch.off::after{left:2px}
+
+  /* Modal & Toast */
+  .toast{position:fixed;top:20px;right:20px;background:var(--card);border-radius:var(--radius-lg);padding:14px 20px;box-shadow:var(--shadow-lg);border:1px solid var(--border);display:none;align-items:center;gap:12px;z-index:9999;max-width:380px;font-size:13px;animation:slideIn .3s ease}
+  @keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+  .toast .toast-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+  .toast .toast-icon.success{background:#d1fae5;color:var(--success)}
+  .toast .toast-icon.warning{background:#fef3c7;color:var(--warning)}
+  .toast .toast-icon.error{background:#fee2e2;color:var(--danger)}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;align-items:center;justify-content:center}
+  .modal-overlay.show{display:flex}
+  .modal-content{background:var(--card);border-radius:var(--radius-xl);padding:24px;max-width:480px;width:90vw;box-shadow:var(--shadow-lg);max-height:80vh;overflow-y:auto}
+  .modal-content h2{font-size:18px;font-weight:700;margin-bottom:4px}
+  .modal-content p{font-size:13px;color:var(--text-secondary);margin-bottom:16px}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+  .text-muted{color:var(--text-muted)}.text-center{text-align:center}.flex{display:flex}.gap-8{gap:8px}.gap-12{gap:12px}.mt-8{margin-top:8px}.mb-16{margin-bottom:16px}
+
+  /* Responsive */
+  @media(max-width:900px){
+    .chart-grid,.content-layout,.rules-layout{grid-template-columns:1fr}
+    .sidebar{width:56px}
+    .sidebar .nav-item span,.sidebar .nav-section,.sidebar-header span,.sidebar-footer .user-info,.sidebar-footer .logout-btn{display:none}
+    .sidebar .nav-item{padding:9px;justify-content:center}.sidebar-header{padding:14px;justify-content:center}.sidebar-footer{padding:10px;justify-content:center}.main-content{margin-left:56px}
+  }
+  @media(max-width:640px){
+    .stats-grid{grid-template-columns:1fr 1fr}.segment-filters{flex-direction:column;align-items:stretch}.topbar .search-box{display:none}
+    .content-form .form-row{grid-template-columns:1fr}.donut-chart{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== 1. Login Page ==================== -->
+<div id="loginPage" class="login-page">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="url(#lg)"/><path d="M8 16l6 6 10-12" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#764ba2"/></linearGradient></defs></svg>
+      <span>ReAgent</span>
+    </div>
+    <h1>欢迎回来</h1>
+    <p>登录您的 ReAgent 营销智能平台</p>
+    <div id="loginError" class="login-error">⚠️ 邮箱或密码不正确，请重试</div>
+    <form class="login-form" id="loginForm" onsubmit="return false;">
+      <div class="form-group">
+        <label for="loginEmail">邮箱地址</label>
+        <div class="input-with-icon">
+          <svg class="input-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5l7 5 7-5M4 16h12a2 2 0 002-2V6a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          <input id="loginEmail" type="email" placeholder="请输入邮箱地址" value="admin@reagent.ai">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="loginPwd">密码</label>
+        <div class="input-with-icon">
+          <svg class="input-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 10V7a5 5 0 0110 0v3m-9 0h8a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4a2 2 0 012-2z"/></svg>
+          <input id="loginPwd" type="password" placeholder="请输入密码" value="••••••••">
+        </div>
+      </div>
+      <div class="login-options">
+        <label><input type="checkbox" checked> 记住我</label>
+        <a href="#" onclick="event.preventDefault();showToast('info','密码重置链接已发送至您的邮箱')">忘记密码？</a>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" onclick="handleLogin()">登录系统</button>
+    </form>
+    <div class="login-footer">
+      还没有账号？<a href="#" onclick="event.preventDefault();showToast('info','请联系系统管理员开通账号')">联系管理员</a>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== App Layout ==================== -->
+<div id="appLayout" class="app-layout">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="url(#lg2)"/><path d="M8 16l6 6 10-12" stroke="#fff" stroke-width="3" stroke-linecap="" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="lg2" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#764ba2"/></linearGradient></defs></svg>
+      <span>ReAgent</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">导航菜单</div>
+      <div class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6v6H2V3zm10 0h6v6h-6V3zM2 13h6v6H2v-6zm10 0h6v6h-6v-6z"/></svg>
+        <span>仪表盘</span>
+      </div>
+      <div class="nav-item" data-page="content" onclick="switchPage('content')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v14M3 10h14"/></svg>
+        <span>内容生成</span>
+      </div>
+      <div class="nav-item" data-page="profile" onclick="switchPage('profile')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 10a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0"/></svg>
+        <span>用户画像</span>
+      </div>
+      <div class="nav-item" data-page="automation" onclick="switchPage('automation')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12h2l2-6 4 10 2-6 2 2h2"/></svg>
+        <span>自动化规则</span>
+        <span class="badge">3</span>
+      </div>
+      <div class="nav-item" data-page="settings" onclick="switchPage('settings')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 13a3 3 0 100-6 3 3 0 000 6z"/><path d="M17.4 10a7.4 7.4 0 01-.36 1.52l1.96 1.52-2 3.46-2.28-.74a7.4 7.4 0 01-1.44.84l-.4 2.4h-4l-.4-2.4a7.4 7.4 0 01-1.44-.84l-2.28.74-2-3.46 1.96-1.52A7.4 7.4 0 012.6 10c0-.52.06-1.04.16-1.52L.8 6.96l2-3.46 2.28.74a7.4 7.4 0 011.44-.84L6.8.8h4l.4 2.4c.5.2.98.48 1.44.84l2.28-.74 2 3.46-1.96 1.52c.1.48.16 1 .16 1.52z"/></svg>
+        <span>API 管理</span>
+      </div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="avatar">林</div>
+      <div class="user-info">
+        <div class="user-name">林小霞</div>
+        <div class="user-role">营销运营 · 管理员</div>
+      </div>
+      <div class="logout-btn" onclick="handleLogout()" title="退出登录">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 17h8a2 2 0 002-2V5a2 2 0 00-2-2H7M12 10H2m0 0l3-3m-3 3l3 3"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="page-title" id="pageTitle">仪表盘</div>
+      <div class="search-box">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M13 13l5 5"/></svg>
+        <input type="text" placeholder="搜索客户、活动或文档...">
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" onclick="showToast('info','你有 3 条未读通知')">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12a8 8 0 0116 0v2H4v-2z"/><path d="M9 14v1a3 3 0 006 0v-1"/></svg>
+          <span class="dot"></span>
+        </button>
+        <button class="icon-btn" onclick="showToast('info','正在刷新数据...')">
+          <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 10a7 7 0 11-4-6.37M17 3v3h-3"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Page Container -->
+    <div class="page-container" id="pageContainer">
+
+      <!-- ========== 2. Dashboard Page ========== -->
+      <div id="page-dashboard" class="page active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">内容生成总数</span>
+              <div class="stat-icon" style="background:#eef2ff;color:var(--primary)">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v14M3 10h14"/></svg>
+              </div>
+            </div>
+            <div class="stat-value">12,458</div>
+            <div class="stat-change up">↑ 12.5% <span class="text-muted">较上周</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">活跃用户</span>
+              <div class="stat-icon" style="background:#d1fae5;color:var(--success)">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 10a4 4 0 100-8 4 4 0 000 8zm-7 8a7 7 0 0114 0"/></svg>
+              </div>
+            </div>
+            <div class="stat-value">3,892</div>
+            <div class="stat-change up">↑ 8.3% <span class="text-muted">较上周</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">自动化规则</span>
+              <div class="stat-icon" style="background:#fef3c7;color:var(--warning)">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12h2l2-6 4 10 2-6 2 2h2"/></svg>
+              </div>
+            </div>
+            <div class="stat-value">47</div>
+            <div class="stat-change up">↑ 3 <span class="text-muted">本月新增</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">推荐点击率</span>
+              <div class="stat-icon" style="background:#ede9fe;color:var(--primary-dark)">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h5l-1-7 5 7h-4l2 6-7-6z"/></svg>
+              </div>
+            </div>
+            <div class="stat-value">32.6%</div>
+            <div class="stat-change up">↑ 2.1% <span class="text-muted">较上月</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">活动触达率</span>
+              <div class="stat-icon" style="background:#ccfbf1;color:var(--success)">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 10l5 5 10-10"/></svg>
+              </div>
+            </div>
+            <div class="stat-value">87.3%</div>
+            <div class="stat-change down">↓ 1.2% <span class="text-muted">较上周</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">月活跃活动</span>
+              <div class="stat-icon" style="background:#fef2f2;color:var(--danger)">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="14" rx="2"/><path d="M8 2v4M12 2v4M3 10h14"/></svg>
+              </div>
+            </div>
+            <div class="stat-value">24</div>
+            <div class="stat-change up">↑ 4 <span class="text-muted">本月新增</span></div>
+          </div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-card">
+            <div class="chart-title">近7日内容生成趋势</div>
+            <div class="bar-chart" id="barChart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-title">用户分群占比</div>
+            <div class="donut-chart" id="donutChart"></div>
+          </div>
+        </div>
+
+        <div class="recent-activity">
+          <div class="activity-header">
+            <h3>最近动态</h3>
+            <button class="btn btn-sm btn-outline" onclick="showToast('info','加载更多历史记录')">查看全部</button>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot success"></div>
+            <div class="activity-content">
+              <div class="act-text">「夏日促销活动」已成功触达 <strong>12,340</strong> 名用户</div>
+              <div class="act-time">2 分钟前</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot info"></div>
+            <div class="activity-content">
+              <div class="act-text">AI 文案生成管线已完成「618 大促」文案输出</div>
+              <div class="act-time">15 分钟前</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot warning"></div>
+            <div class="activity-content">
+              <div class="act-text">自动化规则「高价值用户挽回」触发执行，发送 847 条消息</div>
+              <div class="act-time">1 小时前</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot success"></div>
+            <div class="activity-content">
+              <div class="act-text">新分群「复购达人」创建完成，包含 2,341 名用户</div>
+              <div class="act-time">2 小时前</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot danger"></div>
+            <div class="activity-content">
+              <div class="act-text">API 调用频率超限告警：3 分钟内请求 1,200 次 (阈值 1,000/3min)</div>
+              <div class="act-time">3 小时前</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 3. Content Generation Page ========== -->
+      <div id="page-content" class="page">
+        <div class="content-layout">
+          <div class="content-panel">
+            <h3>内容生成配置</h3>
+            <div class="content-form">
+              <div class="form-group">
+                <label>内容类型</label>
+                <select id="contentType">
+                  <option>营销文案</option>
+                  <option>Banner 横幅</option>
+                  <option>落地页</option>
+                  <option>全管线生成</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>语调风格</label>
+                  <select>
+                    <option>专业正式</option>
+                    <option selected>友好亲切</option>
+                    <option>紧迫感</option>
+                    <option>高端奢华</option>
+                    <option>幽默风趣</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>目标受众</label>
+                  <select>
+                    <option>高价值客户 (VIP)</option>
+                    <option selected>普通活跃用户</option>
+                    <option>流失风险用户</option>
+                    <option>新注册用户</option>
+                    <option>全部用户</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>主题描述</label>
+                <textarea id="contentPrompt" placeholder="请描述需要生成的营销内容主题...">618 年中大促 · 全场 5 折起，会员专享额外 9 折优惠。限时 7 天，立即抢购！</textarea>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>SEO 关键词（可选）</label>
+                  <input placeholder="用逗号分隔" value="618大促,限时优惠,品牌折扣">
+                </div>
+                <div class="form-group">
+                  <label>Banner 尺寸</label>
+                  <select>
+                    <option>1080×1080 (方形)</option>
+                    <option selected>1200×628 (横版)</option>
+                    <option>720×1280 (竖版)</option>
+                  </select>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-block" onclick="generateContent()">
+                <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v14M3 10h14"/></svg>
+                开始生成
+              </button>
+            </div>
+          </div>
+          <div class="content-panel">
+            <h3>生成结果</h3>
+            <div id="generatedResults">
+              <div class="result-card">
+                <div class="result-label">📝 营销文案</div>
+                <div class="result-text" id="copyResult">【618 年中大促 · 限时狂欢】<br><br>🔥 全场 5 折起，会员专享额外 9 折！<br>📅 活动时间：6 月 1 日 - 6 月 18 日<br>💎 VIP 会员专享：满 500 减 100，叠加品牌折扣<br><br>错过等一年！立即抢购 →</div>
+                <div class="result-meta">
+                  <span>模型: GPT-4o</span>
+                  <span>耗时: 2.3s</span>
+                  <span>Tokens: 342</span>
+                </div>
+                <div class="result-actions">
+                  <button class="btn btn-xs btn-outline" onclick="showToast('success','文案已复制到剪贴板')">📋 复制</button>
+                  <button class="btn btn-xs btn-outline" onclick="showToast('info','已重新生成')">🔄 重新生成</button>
+                  <button class="btn btn-xs btn-outline" onclick="showToast('success','已保存到素材库')">💾 保存</button>
+                </div>
+              </div>
+              <div class="result-banner" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)">618 年中大促 · 限时狂欢</div>
+              <div class="result-card">
+                <div class="result-label">📄 落地页</div>
+                <div class="result-text" style="font-size:12px">🔗 落地页已生成：<a href="#" onclick="event.preventDefault();showToast('success','将在新标签页中预览')">preview/reagent/landing/618-promo.html</a></div>
+                <div class="result-meta">
+                  <span>模板: 电商促销</span>
+                  <span>大小: 24KB</span>
+                  <span>响应式: ✓</span>
+                </div>
+                <div class="result-actions">
+                  <button class="btn btn-xs btn-primary" onclick="showToast('success','正在预览落地页')">👁️ 预览</button>
+                  <button class="btn btn-xs btn-outline" onclick="showToast('success','已下载')">⬇️ 下载</button>
+                </div>
+              </div>
+            </div>
+            <div id="generatingSpinner" style="display:none;text-align:center;padding:40px;color:var(--text-muted)">
+              <div style="font-size:28px;margin-bottom:12px">⏳</div>
+              <div>AI 正在生成中，请稍候...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 4. User Profile / Segmentation Page ========== -->
+      <div id="page-profile" class="page">
+        <div class="segment-summary">
+          <div class="summary-card"><div class="num" style="color:var(--primary)">12,458</div><div class="label">总用户数</div></div>
+          <div class="summary-card"><div class="num" style="color:var(--success)">8</div><div class="label">分群数量</div></div>
+          <div class="summary-card"><div class="num" style="color:var(--warning)">847</div><div class="label">流失风险用户</div></div>
+          <div class="summary-card"><div class="num" style="color:var(--info)">32.6%</div><div class="label">VIP 占比</div></div>
+          <div class="summary-card"><div class="num" style="color:var(--danger)">26</div><div class="label">今日新增</div></div>
+        </div>
+
+        <div class="segment-header">
+          <div class="segment-filters">
+            <select>
+              <option>全部分群</option>
+              <option>VIP 客户</option>
+              <option>活跃用户</option>
+              <option>流失风险</option>
+              <option>新注册用户</option>
+              <option>复购达人</option>
+            </select>
+            <select>
+              <option>全部行业</option>
+              <option>电商</option>
+              <option>教育</option>
+              <option>SaaS</option>
+              <option>金融</option>
+            </select>
+            <input placeholder="搜索用户姓名或ID...">
+            <span class="filter-count">共 48 条结果</span>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="showToast('success','新建分群表单已打开')">+ 新建分群</button>
+        </div>
+
+        <table class="segment-table">
+          <thead>
+            <tr>
+              <th>用户</th>
+              <th>邮箱</th>
+              <th>分群</th>
+              <th>价值层级</th>
+              <th>活跃度</th>
+              <th>流失风险</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>张明</strong></td>
+              <td style="color:var(--text-secondary)">zhang.m@example.com</td>
+              <td><span class="tag tag-purple">VIP</span> <span class="tag tag-blue">复购达人</span></td>
+              <td><span class="tag tag-green">高价值</span></td>
+              <td>92%</td>
+              <td><span class="tag tag-green">低</span></td>
+              <td><button class="btn btn-xs btn-outline" onclick="showToast('info','查看用户详情')">查看</button></td>
+            </tr>
+            <tr>
+              <td><strong>李雪</strong></td>
+              <td style="color:var(--text-secondary)">li.xue@example.com</td>
+              <td><span class="tag tag-blue">活跃用户</span></td>
+              <td><span class="tag tag-orange">中价值</span></td>
+              <td>78%</td>
+              <td><span class="tag tag-green">低</span></td>
+              <td><button class="btn btn-xs btn-outline" onclick="showToast('info','查看用户详情')">查看</button></td>
+            </tr>
+            <tr>
+              <td><strong>王磊</strong></td>
+              <td style="color:var(--text-secondary)">wang.l@example.com</td>
+              <td><span class="tag tag-red">流失风险</span></td>
+              <td><span class="tag tag-gray">待评估</span></td>
+              <td>15%</td>
+              <td><span class="tag tag-red">高</span></td>
+              <td><button class="btn btn-xs btn-danger" onclick="showModal('retention')">📢 发送挽回</button></td>
+            </tr>
+            <tr>
+              <td><strong>赵思远</strong></td>
+              <td style="color:var(--text-secondary)">zhao.sy@example.com</td>
+              <td><span class="tag tag-teal">新注册</span></td>
+              <td><span class="tag tag-gray">待评估</span></td>
+              <td>45%</td>
+              <td><span class="tag tag-orange">中</span></td>
+              <td><button class="btn btn-xs btn-outline" onclick="showToast('info','查看用户详情')">查看</button></td>
+            </tr>
+            <tr>
+              <td><strong>陈雅</strong></td>
+              <td style="color:var(--text-secondary)">chen.y@example.com</td>
+              <td><span class="tag tag-purple">VIP</span> <span class="tag tag-blue">复购达人</span></td>
+              <td><span class="tag tag-green">高价值</span></td>
+              <td>97%</td>
+              <td><span class="tag tag-green">低</span></td>
+              <td><button class="btn btn-xs btn-outline" onclick="showToast('info','查看用户详情')">查看</button></td>
+            </tr>
+            <tr>
+              <td><strong>刘航</strong></td>
+              <td style="color:var(--text-secondary)">liu.h@example.com</td>
+              <td><span class="tag tag-red">流失风险</span></td>
+              <td><span class="tag tag-orange">中价值</span></td>
+              <td>8%</td>
+              <td><span class="tag tag-red">高</span></td>
+              <td><button class="btn btn-xs btn-danger" onclick="showModal('retention')">📢 发送挽回</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ========== 5. Automation Rules Page ========== -->
+      <div id="page-automation" class="page">
+        <div class="rules-layout">
+          <div>
+            <div class="rules-list">
+              <div class="rules-list-header">
+                <h3>自动化规则列表</h3>
+                <button class="btn btn-primary btn-sm" onclick="showToast('success','新建规则表单已打开')">+ 新建规则</button>
+              </div>
+              <div class="rule-item selected" onclick="selectRule(this,0)">
+                <button class="rule-toggle on" onclick="event.stopPropagation();toggleRule(this)"></button>
+                <div class="rule-info">
+                  <div class="rule-name">高价值用户生日特惠</div>
+                  <div class="rule-desc">VIP 用户生日前 3 天自动发送优惠券</div>
+                </div>
+                <div class="rule-status">已启用 · 今日触发 12 次</div>
+              </div>
+              <div class="rule-item" onclick="selectRule(this,1)">
+                <button class="rule-toggle on" onclick="event.stopPropagation();toggleRule(this)"></button>
+                <div class="rule-info">
+                  <div class="rule-name">7 日未登录用户挽回</div>
+                  <div class="rule-desc">连续 7 天未登录的用户发送挽回消息</div>
+                </div>
+                <div class="rule-status">已启用 · 今日触发 847 次</div>
+              </div>
+              <div class="rule-item" onclick="selectRule(this,2)">
+                <button class="rule-toggle off" onclick="event.stopPropagation();toggleRule(this)"></button>
+                <div class="rule-info">
+                  <div class="rule-name">高客单价商品推荐</div>
+                  <div class="rule-desc">浏览高端商品后 2 小时内推送相似推荐</div>
+                </div>
+                <div class="rule-status">已暂停 · 上次触发 3 天前</div>
+              </div>
+              <div class="rule-item" onclick="selectRule(this,3)">
+                <button class="rule-toggle on" onclick="event.stopPropagation();toggleRule(this)"></button>
+                <div class="rule-info">
+                  <div class="rule-name">新用户欢迎流程</div>
+                  <div class="rule-desc">注册后 24 小时内发送欢迎消息+新手引导</div>
+                </div>
+                <div class="rule-status">已启用 · 今日触发 26 次</div>
+              </div>
+              <div class="rule-item" onclick="selectRule(this,4)">
+                <button class="rule-toggle off" onclick="event.stopPropagation();toggleRule(this)"></button>
+                <div class="rule-info">
+                  <div class="rule-name">购物车放弃提醒</div>
+                  <div class="rule-desc">加入购物车 30 分钟未下单发送提醒</div>
+                </div>
+                <div class="rule-status">已暂停 · 上次触发 1 天前</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rule-editor" id="ruleEditor">
+            <h3>编辑规则 · 高价值用户生日特惠</h3>
+            <div class="editor-section">
+              <label>规则名称</label>
+              <input value="高价值用户生日特惠">
+            </div>
+            <div class="editor-section">
+              <label>触发条件</label>
+              <div class="condition-row">
+                <select style="width:auto">
+                  <option>用户分群</option>
+                  <option>用户属性</option>
+                  <option>行为事件</option>
+                  <option>时间条件</option>
+                </select>
+                <select style="width:auto">
+                  <option>等于</option>
+                  <option>属于</option>
+                  <option>大于</option>
+                  <option>小于</option>
+                </select>
+                <select style="width:auto">
+                  <option>VIP 客户</option>
+                </select>
+                <span class="logic-badge">AND</span>
+              </div>
+              <div class="condition-row">
+                <select style="width:auto">
+                  <option>用户分群</option>
+                  <option>用户属性</option>
+                  <option>行为事件</option>
+                  <option selected>时间条件</option>
+                </select>
+                <select style="width:auto">
+                  <option>等于</option>
+                  <option>属于</option>
+                  <option selected>小于</option>
+                  <option>大于</option>
+                </select>
+                <input value="3" style="width:60px">
+                <span style="font-size:12px;color:var(--text-secondary)">天</span>
+                <span style="font-size:12px;color:var(--text-secondary)">后为生日</span>
+                <button class="btn btn-xs btn-outline" onclick="showToast('info','添加条件')">+ 添加条件</button>
+              </div>
+            </div>
+            <div class="editor-section">
+              <label>执行动作</label>
+              <div class="action-row">
+                <div class="action-icon" style="background:#dbeafe;color:#1d4ed8">✉</div>
+                <div><strong>发送消息</strong> · 渠道: 邮件+短信 · 模板: 生日优惠券模板</div>
+              </div>
+              <div class="action-row">
+                <div class="action-icon" style="background:#d1fae5;color:#065f46">🏷</div>
+                <div><strong>添加标签</strong> · 标签: 「生日营销_已触达」</div>
+              </div>
+              <button class="btn btn-xs btn-outline" onclick="showToast('info','添加动作')">+ 添加动作</button>
+            </div>
+            <div class="editor-section">
+              <label>冷却设置</label>
+              <select>
+                <option>每次触发 (无冷却)</option>
+                <option selected>每用户每 30 天触发一次</option>
+                <option>每用户每 7 天触发一次</option>
+                <option>每用户仅触发一次</option>
+              </select>
+            </div>
+            <div class="editor-actions">
+              <button class="btn btn-primary btn-sm" onclick="showToast('success','规则已保存')">💾 保存规则</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('info','规则已测试，预计影响 234 名用户')">▶️ 测试执行</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('info','执行日志已打开')">📋 查看日志</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 6. API Management / Settings Page ========== -->
+      <div id="page-settings" class="page">
+        <div class="settings-layout">
+          <div class="settings-section">
+            <h3>🔑 API 密钥管理</h3>
+            <div class="section-desc">管理和创建您的 API 密钥，用于外部系统集成</div>
+            <div class="api-key-row">
+              <div class="key-name">生产环境</div>
+              <div class="key-value">rg_live_8a7b6c5d4e3f2g1h0i9j8k7l6m5n4o3p2q1r0s</div>
+              <div class="key-status"><span class="tag tag-green">活跃</span></div>
+              <div class="key-actions">
+                <button class="btn btn-xs btn-outline" onclick="showToast('success','密钥已复制')">📋 复制</button>
+                <button class="btn btn-xs btn-outline" onclick="showToast('info','密钥已刷新')">🔄 刷新</button>
+                <button class="btn btn-xs btn-outline" style="color:var(--danger)" onclick="showToast('warning','已撤销该密钥')">🗑️ 撤销</button>
+              </div>
+            </div>
+            <div class="api-key-row">
+              <div class="key-name">测试环境</div>
+              <div class="key-value">rg_test_1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s</div>
+              <div class="key-status"><span class="tag tag-orange">测试</span></div>
+              <div class="key-actions">
+                <button class="btn btn-xs btn-outline" onclick="showToast('success','密钥已复制')">📋 复制</button>
+                <button class="btn btn-xs btn-outline" onclick="showToast('info','密钥已刷新')">🔄 刷新</button>
+                <button class="btn btn-xs btn-outline" style="color:var(--danger)" onclick="showToast('warning','已撤销该密钥')">🗑️ 撤销</button>
+              </div>
+            </div>
+            <div class="api-key-row">
+              <div class="key-name">开发环境</div>
+              <div class="key-value">rg_dev_9z8y7x6w5v4u3t2s1r0q9p8o7n6m5l4k3j2i1h</div>
+              <div class="key-status"><span class="tag tag-blue">开发</span></div>
+              <div class="key-actions">
+                <button class="btn btn-xs btn-outline" onclick="showToast('success','密钥已复制')">📋 复制</button>
+                <button class="btn btn-xs btn-outline" onclick="showToast('info','密钥已刷新')">🔄 刷新</button>
+                <button class="btn btn-xs btn-outline" style="color:var(--danger)" onclick="showToast('warning','已撤销该密钥')">🗑️ 撤销</button>
+              </div>
+            </div>
+            <div style="margin-top:12px">
+              <button class="btn btn-primary btn-sm" onclick="showModal('newApiKey')">+ 创建新密钥</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>⚙️ 系统设置</h3>
+            <div class="section-desc">配置系统运行参数与安全策略</div>
+            <div class="settings-row">
+              <div>
+                <div class="setting-label">API 限流</div>
+                <div class="setting-desc">每个 API 密钥每分钟最大请求数</div>
+              </div>
+              <div class="setting-control">
+                <select>
+                  <option>100 次/分钟</option>
+                  <option selected>500 次/分钟</option>
+                  <option>1000 次/分钟</option>
+                  <option>不限流</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="setting-label">CORS 白名单</div>
+                <div class="setting-desc">允许跨域请求的域名列表</div>
+              </div>
+              <div class="setting-control">
+                <input value="https://*.reagent.ai, https://admin.example.com" style="width:260px">
+              </div>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="setting-label">JWT 令牌有效期</div>
+                <div class="setting-desc">登录令牌过期时间</div>
+              </div>
+              <div class="setting-control">
+                <select>
+                  <option>1 小时</option>
+                  <option selected>24 小时</option>
+                  <option>7 天</option>
+                  <option>30 天</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="setting-label">数据加密</div>
+                <div class="setting-desc">对客户 PII 字段进行 AES-256 加密存储</div>
+              </div>
+              <div class="setting-control">
+                <button class="toggle-switch on" onclick="toggleSwitch(this)"></button>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="setting-label">审计日志</div>
+                <div class="setting-desc">记录所有数据变更与敏感操作</div>
+              </div>
+              <div class="setting-control">
+                <button class="toggle-switch on" onclick="toggleSwitch(this)"></button>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="setting-label">自动备份</div>
+                <div class="setting-desc">每日凌晨 3:00 自动备份配置数据</div>
+              </div>
+              <div class="setting-control">
+                <button class="toggle-switch on" onclick="toggleSwitch(this)"></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>📡 Webhook 配置</h3>
+            <div class="section-desc">接收外部系统事件推送</div>
+            <div class="api-key-row">
+              <div>
+                <div style="font-weight:600;font-size:13px">事件接收 URL</div>
+                <div style="font-family:monospace;font-size:12px;color:var(--text-secondary);margin-top:2px">https://api.reagent.ai/api/v1/automation/events/process</div>
+              </div>
+              <button class="btn btn-xs btn-outline" onclick="showToast('success','URL 已复制')">📋 复制</button>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="setting-label">Webhook Secret</div>
+                <div class="setting-desc">用于验证回调请求的签名密钥</div>
+              </div>
+              <div class="setting-control" style="display:flex;gap:8px;align-items:center">
+                <input value="whsec_••••••••••••••••" style="width:180px;font-family:monospace">
+                <button class="btn btn-xs btn-outline" onclick="showToast('info','Secret 已刷新')">🔄 重置</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>👤 团队管理</h3>
+            <div class="section-desc">管理团队成员与角色权限</div>
+            <div style="margin-bottom:12px">
+              <button class="btn btn-primary btn-sm" onclick="showToast('success','邀请链接已生成')">+ 邀请成员</button>
+            </div>
+            <table class="segment-table">
+              <thead><tr><th>姓名</th><th>角色</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td>林小霞</td><td><span class="tag tag-purple">管理员</span></td><td><span class="tag tag-green">在线</span></td><td><button class="btn btn-xs btn-outline">编辑</button></td></tr>
+                <tr><td>张开发</td><td><span class="tag tag-blue">开发者</span></td><td><span class="tag tag-green">在线</span></td><td><button class="btn btn-xs btn-outline">编辑</button></td></tr>
+                <tr><td>李分析</td><td><span class="tag tag-orange">分析师</span></td><td><span class="tag tag-gray">离线</span></td><td><button class="btn btn-xs btn-outline">编辑</button></td></tr>
+                <tr><td>王运营</td><td><span class="tag tag-teal">运营</span></td><td><span class="tag tag-green">在线</span></td><td><button class="btn btn-xs btn-outline">编辑</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-container -->
+  </div><!-- /main-content -->
+</div><!-- /app-layout -->
+
+<!-- ========== Toast ========== -->
+<div id="toast" class="toast">
+  <div class="toast-icon success" id="toastIcon">✓</div>
+  <span id="toastMsg">操作成功</span>
+</div>
+
+<!-- ========== Modal ========== -->
+<div id="modalOverlay" class="modal-overlay">
+  <div class="modal-content">
+    <h2 id="modalTitle">确认操作</h2>
+    <p id="modalDesc">确定要执行此操作吗？</p>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" id="modalConfirmBtn" onclick="closeModal();showToast('success','操作已执行')">确认</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ========== Login Handler ==========
+  function handleLogin() {
+    var email = document.getElementById('loginEmail').value;
+    if (!email || email.indexOf('@') === -1) {
+      document.getElementById('loginError').style.display = 'block';
+      return false;
+    }
+    document.getElementById('loginError').style.display = 'none';
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('appLayout').style.display = 'flex';
+    initCharts();
+    return false;
+  }
+
+  function handleLogout() {
+    document.getElementById('appLayout').style.display = 'none';
+    document.getElementById('loginPage').style.display = 'flex';
+    showToast('info','已安全退出登录');
+  }
+
+  // ========== Page Navigation ==========
+  var pageNames = {
+    dashboard:'仪表盘',
+    content:'内容生成',
+    profile:'用户画像',
+    automation:'自动化规则',
+    settings:'API 管理'
+  };
+
+  function switchPage(pageId) {
+    document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+    document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+    document.getElementById('page-' + pageId).classList.add('active');
+    document.querySelector('.nav-item[data-page="'+pageId+'"]').classList.add('active');
+    document.getElementById('pageTitle').textContent = pageNames[pageId] || pageId;
+  }
+
+  // ========== Rule Selection ==========
+  var ruleData = [
+    { name:'高价值用户生日特惠', desc:'VIP 用户生日前 3 天自动发送优惠券', on:true },
+    { name:'7 日未登录用户挽回', desc:'连续 7 天未登录的用户发送挽回消息', on:true },
+    { name:'高客单价商品推荐', desc:'浏览高端商品后 2 小时内推送相似推荐', on:false },
+    { name:'新用户欢迎流程', desc:'注册后 24 小时内发送欢迎消息+新手引导', on:true },
+    { name:'购物车放弃提醒', desc:'加入购物车 30 分钟未下单发送提醒', on:false }
+  ];
+
+  function selectRule(el, idx) {
+    document.querySelectorAll('.rule-item').forEach(function(r){ r.style.background=''; });
+    el.style.background = 'var(--primary-bg)';
+    var d = ruleData[idx];
+    var editor = document.getElementById('ruleEditor');
+    editor.querySelector('h3').textContent = '编辑规则 · ' + d.name;
+    editor.querySelector('input').value = d.name;
+    showToast('info','已选择规则：' + d.name);
+  }
+
+  function toggleRule(el) {
+    el.classList.toggle('on');
+    el.classList.toggle('off');
+    var name = el.closest('.rule-item').querySelector('.rule-name').textContent;
+    var state = el.classList.contains('on') ? '已启用' : '已暂停';
+    showToast('success','规则「' + name + '」' + state);
+  }
+
+  // ========== Toggle Switch ==========
+  function toggleSwitch(el) {
+    el.classList.toggle('on');
+    el.classList.toggle('off');
+  }
+
+  // ========== Content Generation ==========
+  function generateContent() {
+    var btn = document.querySelector('#page-content .btn-primary');
+    btn.disabled = true;
+    btn.textContent = '⏳ 生成中...';
+    document.getElementById('generatedResults').style.display = 'none';
+    document.getElementById('generatingSpinner').style.display = 'block';
+
+    setTimeout(function() {
+      document.getElementById('generatingSpinner').style.display = 'none';
+      document.getElementById('generatedResults').style.display = 'block';
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3v14M3 10h14"/></svg> 开始生成';
+      showToast('success','🎉 内容生成完成！文案、Banner、落地页均已产出');
+    }, 2000);
+  }
+
+  // ========== Toast ==========
+  var toastTimer = null;
+  function showToast(type, msg) {
+    var toast = document.getElementById('toast');
+    var icon = document.getElementById('toastIcon');
+    var text = document.getElementById('toastMsg');
+    var icons = { success:'✓', warning:'⚠', error:'✕', info:'ℹ' };
+    icon.textContent = icons[type] || '✓';
+    icon.className = 'toast-icon ' + type;
+    text.textContent = msg;
+    toast.style.display = 'flex';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.style.display = 'none'; }, 3000);
+  }
+
+  // ========== Modal ==========
+  function showModal(type) {
+    var overlay = document.getElementById('modalOverlay');
+    var title = document.getElementById('modalTitle');
+    var desc = document.getElementById('modalDesc');
+    var body = document.getElementById('modalBody');
+    var confirmBtn = document.getElementById('modalConfirmBtn');
+
+    if (type === 'retention') {
+      title.textContent = '📢 发送用户挽回消息';
+      desc.textContent = '将向该用户发送挽回消息，包含专属优惠券。确认执行？';
+      body.innerHTML = '<div style="background:var(--bg);border-radius:var(--radius);padding:12px;font-size:13px"><p><strong>预计触达：</strong>邮件 + 短信</p><p><strong>优惠券：</strong>满 200 减 50 · 7 天有效</p></div>';
+    } else if (type === 'newApiKey') {
+      title.textContent = '🔑 创建新 API 密钥';
+      desc.textContent = '为新集成创建 API 密钥，请选择环境和权限范围';
+      body.innerHTML = '<div style="display:flex;flex-direction:column;gap:12px"><div><label style="font-size:12px;font-weight:600;color:var(--text-secondary)">环境</label><select style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius);margin-top:4px"><option>生产环境</option><option selected>测试环境</option><option>开发环境</option></select></div><div><label style="font-size:12px;font-weight:600;color:var(--text-secondary)">权限范围</label><select style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius);margin-top:4px"><option selected>全部权限</option><option>只读</option><option>内容管理</option><option>自动化管理</option></select></div></div>';
+      confirmBtn.textContent = '创建密钥';
+    } else {
+      title.textContent = '确认操作';
+      desc.textContent = '确定要执行此操作吗？';
+      body.innerHTML = '';
+      confirmBtn.textContent = '确认';
+    }
+    overlay.classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+  }
+
+  // Close modal on overlay click
+  document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // ========== Charts ==========
+  function initCharts() {
+    renderBarChart();
+    renderDonutChart();
+  }
+
+  function renderBarChart() {
+    var container = document.getElementById('barChart');
+    var data = [
+      { label:'周一', value:320, color:'var(--primary)' },
+      { label:'周二', value:450, color:'var(--primary)' },
+      { label:'周三', value:280, color:'var(--primary)' },
+      { label:'周四', value:560, color:'var(--primary-light)' },
+      { label:'周五', value:720, color:'var(--primary-light)' },
+      { label:'周六', value:410, color:'var(--primary)' },
+      { label:'周日', value:380, color:'var(--primary)' }
+    ];
+    var maxVal = 0;
+    data.forEach(function(d){ if(d.value > maxVal) maxVal = d.value; });
+    var html = '';
+    data.forEach(function(d){
+      var pct = (d.value / maxVal) * 100;
+      html += '<div class="bar"><div class="bar-value">'+d.value+'</div><div class="bar-inner" style="height:'+pct+'%;background:'+d.color+'"></div><div class="bar-label">'+d.label+'</div></div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function renderDonutChart() {
+    var container = document.getElementById('donutChart');
+    var segments = [
+      { label:'VIP 客户', value:32.6, color:'#6366f1' },
+      { label:'活跃用户', value:28.4, color:'#10b981' },
+      { label:'新注册用户', value:18.2, color:'#f59e0b' },
+      { label:'流失风险', value:12.8, color:'#ef4444' },
+      { label:'沉默用户', value:8.0, color:'#94a3b8' }
+    ];
+    var total = 100;
+    var cx = 60, cy = 60, r = 50;
+    var circumference = 2 * Math.PI * r;
+    var offset = 0;
+    var donutHtml = '<div class="donut-visual"><svg width="120" height="120" viewBox="0 0 120 120">';
+    segments.forEach(function(seg){
+      var pct = seg.value / total;
+      var dashLen = pct * circumference;
+      donutHtml += '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+seg.color+'" stroke-width="16" stroke-dasharray="'+dashLen+' '+(circumference-dashLen)+'" stroke-dashoffset="'+(-offset)+'" opacity="0.85"/>';
+      offset += dashLen;
+    });
+    donutHtml += '</svg><div class="donut-center"><div class="num">12.5K</div><div class="label">总用户</div></div></div>';
+
+    var legendHtml = '<div class="donut-legend">';
+    segments.forEach(function(seg){
+      legendHtml += '<div class="legend-item"><div class="legend-color" style="background:'+seg.color+'"></div><span>'+seg.label+'</span><span style="margin-left:auto;font-weight:600">'+seg.value+'%</span></div>';
+    });
+    legendHtml += '</div>';
+    container.innerHTML = donutHtml + legendHtml;
+  }
+
+  // ========== Enter key on login ==========
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('loginPwd').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') handleLogin();
+    });
+    document.getElementById('loginEmail').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') handleLogin();
+    });
+  });
+</script>
+</body>
+</html>
