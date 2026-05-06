@@ -1,103 +1,214 @@
-# ReAgent 🧠
+# ReAgent · 重构智能ReAgent 🧠
 
-**AI Marketing System** — 面向现代营销的智能推荐与自动化平台，提供从客户画像分析到 ML 驱动营销活动编排的一体化方案。
+**ReAgent（重构智能ReAgent）** 是新一代 AI 驱动的智能营销平台。
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
-[![Python](https://img.shields.io/badge/python-3.10+-green.svg)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
+核心能力：
+- **🤖 AI 内容生成** — 多模型文案撰写 + Banner/落地页素材生成
+- **👤 用户画像分析** — 通用画像分析 + 行业模板 + AI 洞察
+- **⚙️ 营销自动化** — 规则引擎驱动的营销编排
 
 ---
 
-## 📦 Modules
+## 🏗 系统架构
 
-| Module | Description |
-|---|---|
-| **customer-profile/** | 客户画像数据处理、Enrichment 引擎、CRUD 服务与 REST API |
-| **recommendation-engine/** | 协同过滤、基于内容、混合推荐引擎，支持模型版本化与 A/B 测试 |
-| **marketing-automation/** | 工作流编排引擎、活动模板管理、A/B 测试活动支持 |
-| **analytics-dashboard/** | 指标计算、报告生成、WebSocket 实时数据面板 |
-| **api/** | API 网关、JWT 认证、CORS、API Key 管理 |
-| **shared/** | 配置管理、缓存、错误处理、日志工具集 |
-| **scripts/** | 运行脚本、测试脚本、种子数据生成 |
+```
+┌─────────────────────────────────────────────────────────┐
+│                     REST API (FastAPI)                    │
+│   /api/v1/ai · /api/v1/content · /api/v1/profile · ...   │
+└────────┬──────────┬──────────┬──────────┬────────────────┘
+         │          │          │          │
+    ┌────▼────┐┌───▼────┐┌───▼────┐┌───▼──────────┐
+    │   AI    ││ Content││Profile ││ Automation   │
+    │ Adapter ││Pipeline││Analyzer││   Engine     │
+    │  Layer  ││        ││        ││              │
+    └────┬────┘└───┬────┘└───┬────┘└───┬──────────┘
+         │         │         │         │
+    ┌────▼─────────▼─────────▼─────────▼──────────┐
+    │              Shared Infrastructure           │
+    │    Config · Cache · Logging · Errors         │
+    └──────────────────────────────────────────────┘
+```
+
+### AI 模型适配层（多模型切换）
+
+```
+┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+│  OpenAI     │  │  Anthropic  │  │   Local     │
+│  Adapter    │  │  Claude     │  │   Ollama    │
+│  (GPT-4o)   │  │  (Sonnet)   │  │   (Qwen)    │
+└──────┬──────┘  └──────┬──────┘  └──────┬──────┘
+       └────────────────┼────────────────┘
+                        ▼
+              ┌─────────────────┐
+              │  AI Registry    │
+              │  (auto-routing) │
+              └─────────────────┘
+```
+
+### 内容生成管线
+
+```
+文案请求 ──► AI Model ──► 文案输出
+                              │
+                    ┌─────────┴─────────┐
+                    ▼                   ▼
+             Banner生成           Landing页生成
+             (PIL/FFmpeg)         (Jinja2/HTML)
+                    │                   │
+                    └─────────┬─────────┘
+                              ▼
+                        素材输出
+```
+
+---
 
 ## 🚀 Quick Start
 
+### 1. 环境准备
+
 ```bash
+# Clone
+cd /path/to/reagent
+
+# 虚拟环境
+python3 -m venv venv
+source venv/bin/activate
+
+# 依赖
 pip install -r requirements.txt
-python -m api.main
+
+# 配置
+cp .env.example .env
+# 编辑 .env，填入 API Key
 ```
 
-### Prerequisites
-
-- Python 3.10+
-- pip
-
-### Development Setup
+### 2. 启动服务
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run tests
-bash scripts/test.sh
-
-# Seed sample data
-python scripts/seed_data.py
-
-# Start the server
 bash scripts/run.sh
+# 或直接
+python3 -m reagent.main
 ```
 
-## 🏗 Architecture
-
-```
-                    ┌─────────────┐
-                    │  API Gateway │
-                    │  (auth/CORS) │
-                    └──────┬──────┘
-          ┌────────────────┼────────────────┐
-          ▼                ▼                ▼
-  ┌────────────┐  ┌──────────────┐  ┌──────────────┐
-  │  Customer  │  │  Marketing   │  │  Analytics   │
-  │  Profile   │  │  Automation  │  │  Dashboard   │
-  └────────────┘  └──────────────┘  └──────────────┘
-  ┌─────────────────────────────────────────────────┐
-  │          Recommendation Engine                   │
-  │  (collaborative + content-based + hybrid)        │
-  └─────────────────────────────────────────────────┘
-  ┌─────────────────────────────────────────────────┐
-  │         Shared Infrastructure                    │
-  │  (config · cache · errors · logging · event bus) │
-  └─────────────────────────────────────────────────┘
-```
-
-### Key Features
-
-- **Hybrid Recommendations**: 协同过滤 + 基于内容 + 加权集成混合推荐
-- **Deep Learning ML**: 深度学习协同过滤，支持模型版本管理和 A/B 测试
-- **Compliance Ready**: GDPR 同意管理、数据保留与审计日志
-- **Real-time Dashboard**: WebSocket 驱动的实时指标面板
-
-## 📜 Version History
-
-| Version | Date | Highlights | Tag |
-|---|---|---|---|
-| **v1.0.0** | 2026-05-04 | 🎯 正式发布 — 生产级 AI 营销平台，GDPR 合规模块 | `v1.0.0` |
-| **v0.3.0** | 2024-11-18 | 📊 仪表盘 & 性能优化、WebSocket 实时刷新 | `v0.3.0` |
-| **v0.2.0** | 2024-07-15 | 🔐 集成层 & 认证（JWT、API Key、RBAC） | `v0.2.0` |
-| **v0.1.0** | 2024-04-08 | 🚀 初始版本 — 基础架构搭建 | `v0.1.0` |
-
-完整变更日志见 [CHANGELOG.md](CHANGELOG.md)。
-
-## 🧪 Testing
+### 3. 验证
 
 ```bash
-# Run all tests
-bash scripts/test.sh
-
-# Run specific module tests
-python -m pytest customer-profile/test_*
+curl http://localhost:8000/api/v1/health
+# → {"status":"ok","version":"2.0.0","service":"ReAgent"}
 ```
+
+### 4. 运行测试
+
+```bash
+cd /path/to/reagent
+python3 -m pytest tests/ -v
+```
+
+---
+
+## 📡 API 概览
+
+### AI 模型
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/ai/generate` | AI 文本生成 |
+| GET | `/api/v1/ai/models` | 可用模型列表 |
+| POST | `/api/v1/ai/generate/stream` | SSE 流式生成 |
+
+### 内容生成
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/content/generate` | 端到端内容生成 |
+| POST | `/api/v1/content/copy` | 仅生成文案 |
+| POST | `/api/v1/content/full` | 全管线（文案+Banner+落地页） |
+
+### 用户画像
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/profile/analyze` | 分析用户画像 |
+| GET | `/api/v1/profile/templates` | 行业模板列表 |
+| GET | `/api/v1/profile/templates/{industry}` | 获取行业模板 |
+
+### 营销自动化
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/automation/rules` | 创建规则 |
+| GET | `/api/v1/automation/rules` | 规则列表 |
+| POST | `/api/v1/automation/campaigns` | 创建活动 |
+| POST | `/api/v1/automation/events/process` | 处理事件 |
+| GET | `/api/v1/automation/executions` | 执行记录 |
+
+---
+
+## 🧩 模块一览
+
+### reagent/ai/ — AI 模型适配层
+- `base.py` — 适配器接口抽象
+- `registry.py` — 模型注册与路由
+- `openai_adapter.py` — OpenAI/GPT-4o
+- `claude_adapter.py` — Anthropic Claude
+- `local_adapter.py` — Local/Ollama
+
+### reagent/content/ — 内容生成管线
+- `pipeline.py` — 管线编排器
+- `copywriter.py` — AI 文案撰写
+- `banner.py` — Banner 图片生成 (PIL)
+- `landing.py` — 落地页 HTML 生成 (Jinja2)
+- `media_gen.py` — FFmpeg 视频拼接
+
+### reagent/profile/ — 用户画像分析
+- `analyzer.py` — 画像分析引擎
+- `segmenter.py` — 用户分群引擎
+- `templates.py` — 行业模板管理
+
+### reagent/automation/ — 营销自动化
+- `engine.py` — 核心编排引擎
+- `rules.py` — 规则条件评估
+- `triggers.py` — 事件/定时触发器
+- `actions.py` — 动作执行器
+
+---
+
+## 📋 Phase 1 开发状态
+
+| 模块 | 状态 | 备注 |
+|------|------|------|
+| AI 模型适配层 | ✅ 完成 | OpenAI + Claude + Local |
+| 文案撰写 | ✅ 完成 | 多语调支持 |
+| Banner 生成 | ✅ MVP | PIL 图片合成 |
+| 落地页生成 | ✅ MVP | Jinja2 HTML 渲染 |
+| FFmpeg 媒体拼接 | ✅ MVP | 视频拼接 + 文字叠加 |
+| 用户画像分析 | ✅ 完成 | AI洞察 + 规则分群 |
+| 行业模板库 | ✅ 完成 | 电商/教育/SaaS/通用 |
+| 规则引擎 | ✅ 完成 | CRUD + 条件评估 |
+| 事件触发 | ✅ 完成 | 事件 + 定时触发 |
+| 动作执行 | ✅ 完成 | 消息/Webhook/标签等 |
+| API 接口 | ✅ 完成 | RESTful + 流式支持 |
+| 单元测试 | ✅ 完成 | 80+ 测试用例 |
+
+---
+
+## 🛠 技术栈
+
+| 层级 | 选型 |
+|------|------|
+| 后端框架 | Python FastAPI |
+| API 模式 | REST + SSE Streaming |
+| AI 接入 | OpenAI SDK / Anthropic SDK / LiteLLM |
+| 数据校验 | Pydantic v2 |
+| 配置管理 | pydantic-settings |
+| 图片生成 | Pillow (PIL) |
+| 模板渲染 | Jinja2 |
+| 视频处理 | FFmpeg (subprocess) |
+| 缓存 | MemoryCache / Redis |
+| 日志 | Loguru |
+| HTTP 客户端 | httpx |
+
+---
 
 ## 📄 License
 

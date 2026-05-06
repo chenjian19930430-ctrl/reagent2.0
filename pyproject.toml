@@ -1,3 +1,9 @@
 [project]
 name = "reagent"
-version = "1.0.0"
+version = "2.0.0"
+description = "ReAgent · Intelligent Marketing AI Platform"
+requires-python = ">=3.11"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
