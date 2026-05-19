@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=430, initial-scale=0.9">
+<title>ReAgent · NFC碰触落地页</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #f5f7fa;
+    --card-bg: #ffffff;
+    --primary: #2563eb;
+    --primary-light: #eef2ff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-dim: #94a3b8;
+    --border: #e2e8f0;
+    --success: #22c55e;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; max-width: 430px; margin: 0 auto; padding: 0; }
+  .banner { background: linear-gradient(135deg, #2563eb, #00d4ff); padding: 32px 20px 48px; text-align: center; color: white; position: relative; }
+  .banner .shop-tag { display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 12px; margin-bottom: 8px; }
+  .banner h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+  .banner p { font-size: 14px; opacity: 0.85; }
+  .content { padding: 0 16px; margin-top: -20px; }
+  .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .card-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; }
+  .action-btn { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg); border-radius: var(--radius-sm); margin-bottom: 10px; cursor: pointer; border: 1px solid var(--border); transition: all 0.2s; width: 100%; text-align: left; font-family: inherit; font-size: 15px; color: var(--text-primary); }
+  .action-btn:hover { border-color: var(--primary); background: var(--primary-light); }
+  .action-btn .icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .action-btn .info { flex: 1; }
+  .action-btn .info .name { font-weight: 500; }
+  .action-btn .info .sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .action-btn .arrow { color: var(--text-dim); font-size: 18px; }
+  .coupon-card { background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1px dashed #f59e0b; border-radius: var(--radius-sm); padding: 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .coupon-card .price { font-size: 28px; font-weight: 800; color: #dc2626; }
+  .coupon-card .price span { font-size: 14px; }
+  .coupon-card .info { font-size: 13px; color: #92400e; }
+  .coupon-card button { background: #dc2626; color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .shop-card { display: flex; gap: 12px; padding: 14px; background: var(--bg); border-radius: var(--radius-sm); border: 1px solid var(--border); margin-bottom: 10px; }
+  .shop-card .avatar { width: 48px; height: 48px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; flex-shrink: 0; }
+  .shop-card .info { flex: 1; }
+  .shop-card .name { font-weight: 600; font-size: 15px; }
+  .shop-card .tags { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+  .shop-card .tags span { background: var(--primary-light); color: var(--primary); padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+  .shop-card .rating { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+  .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .quick-action { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; text-align: center; cursor: pointer; font-family: inherit; font-size: 13px; color: var(--text-primary); }
+  .quick-action .icon { font-size: 24px; display: block; margin-bottom: 4px; }
+  .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: var(--card-bg); border-top: 1px solid var(--border); padding: 8px 16px; display: flex; justify-content: space-around; }
+  .bottom-nav a { text-decoration: none; color: var(--text-dim); font-size: 11px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .bottom-nav a.active { color: var(--primary); }
+  .bottom-nav a .icon { font-size: 20px; }
+  .toast { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 12px 24px; border-radius: 20px; font-size: 14px; font-weight: 500; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+  .toast.show { display: block; }
+  .return-btn { display: inline-block; padding: 8px 16px; background: rgba(255,255,255,0.2); border-radius: 20px; color: white; font-size: 13px; text-decoration: none; margin-top: 12px; }
+  .success-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; align-items: center; justify-content: center; }
+  .success-overlay.show { display: flex; }
+  .success-box { background: white; border-radius: var(--radius); padding: 32px; text-align: center; max-width: 340px; }
+  .success-box .check { font-size: 48px; }
+  .success-box h2 { margin: 12px 0 4px; }
+  .success-box p { color: var(--text-secondary); font-size: 14px; margin-bottom: 16px; }
+  .done-btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 10px 32px; font-size: 15px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast">✅ 操作成功！</div>
+
+<div class="banner">
+  <div class="shop-tag">📍 已到店</div>
+  <h1>川味火锅 · 旗舰店</h1>
+  <p>碰一碰，解锁全部福利</p>
+  <div style="margin-top: 12px;">
+    <a href="#" class="return-btn">← 返回商户主页</a>
+  </div>
+</div>
+
+<div class="content">
+  <!-- Store Info -->
+  <div class="card">
+    <div class="shop-card">
+      <div class="avatar">🌶️</div>
+      <div class="info">
+        <div class="name">川味火锅旗舰店</div>
+        <div class="rating">⭐⭐⭐⭐ 4.8 · 月售2000+</div>
+        <div class="tags">
+          <span>🔥 人气王</span>
+          <span>🎉 新人专享</span>
+        </div>
+      </div>
+    </div>
+    <div class="quick-actions">
+      <button class="quick-action" onclick="showToast()">
+        <span class="icon">⭐</span>
+        打卡收藏
+      </button>
+      <button class="quick-action" onclick="showToast()">
+        <span class="icon">💬</span>
+        加微信
+      </button>
+      <button class="quick-action" onclick="showToast()">
+        <span class="icon">🛒</span>
+        团购直达
+      </button>
+      <button class="quick-action" onclick="showToast()">
+        <span class="icon">🎫</span>
+        领优惠券
+      </button>
+    </div>
+  </div>
+
+  <!-- Coupon -->
+  <div class="card">
+    <div class="card-title">🎉 新人专享优惠</div>
+    <div class="coupon-card">
+      <div>
+        <div class="price">¥10 <span>满50可用</span></div>
+        <div class="info">有效期7天 · 限新用户</div>
+      </div>
+      <button onclick="showToast()">立即领取</button>
+    </div>
+  </div>
+
+  <!-- One-click Actions -->
+  <div class="card">
+    <div class="card-title">⭐ 一键打卡收藏</div>
+    <div class="card-desc">碰触后自动引导您在各平台打卡收藏</div>
+
+    <button class="action-btn" onclick="showToast()">
+      <div class="icon" style="background: #ffe4e6;">🍜</div>
+      <div class="info">
+        <div class="name">大众点评 · 打卡签到</div>
+        <div class="sub">获得平台积分 + 商家优惠</div>
+      </div>
+      <div class="arrow">›</div>
+    </button>
+
+    <button class="action-btn" onclick="showToast()">
+      <div class="icon" style="background: #dbeafe;">🎵</div>
+      <div class="info">
+        <div class="name">抖音 · 打卡收藏</div>
+        <div class="sub">助力商家上热门</div>
+      </div>
+      <div class="arrow">›</div>
+    </button>
+
+    <button class="action-btn" onclick="showToast()">
+      <div class="icon" style="background: #fef3c7;">🗺️</div>
+      <div class="info">
+        <div class="name">高德 · 收藏店铺</div>
+        <div class="sub">导航更方便</div>
+      </div>
+      <div class="arrow">›</div>
+    </button>
+
+    <button class="action-btn" onclick="showToast()">
+      <div class="icon" style="background: #dcfce7;">📍</div>
+      <div class="info">
+        <div class="name">百度地图 · 收藏打卡</div>
+        <div class="sub">到店打卡记录</div>
+      </div>
+      <div class="arrow">›</div>
+    </button>
+  </div>
+
+  <!-- WeChat -->
+  <div class="card">
+    <div class="card-title">💬 加微信好友</div>
+    <div class="card-desc">添加商家企业微信，获取更多优惠信息</div>
+
+    <div style="display: flex; gap: 12px; align-items: center; padding: 14px; background: var(--bg); border-radius: var(--radius-sm);">
+      <div style="width: 100px; height: 100px; background: white; border: 2px dashed var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-dim); text-align: center;">
+        二维码加载中
+      </div>
+      <div>
+        <div style="font-weight: 500; margin-bottom: 4px;">川味火锅 · 客服</div>
+        <div style="font-size: 12px; color: var(--text-secondary);">长按识别或截图扫码</div>
+        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">
+          ✅ 已有 <strong style="color: var(--primary);">1,284</strong> 人添加
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Explore More -->
+  <div class="card" style="margin-bottom: 80px;">
+    <div class="card-title">📌 更多服务</div>
+
+    <button class="action-btn" onclick="showToast()">
+      <div class="icon" style="background: #ede9fe;">🛒</div>
+      <div class="info">
+        <div class="name">团购直达</div>
+        <div class="sub">查看美团/大众/抖音团购套餐</div>
+      </div>
+      <div class="arrow">›</div>
+    </button>
+
+    <button class="action-btn" onclick="showToast()">
+      <div class="icon" style="background: #e0f2fe;">📶</div>
+      <div class="info">
+        <div class="name">店内Wi-Fi</div>
+        <div class="sub">一键连接免费Wi-Fi</div>
+      </div>
+      <div class="arrow">›</div>
+    </button>
+
+    <button class="action-btn" onclick="showToast()">
+      <div class="icon" style="background: #fce7f3;">📝</div>
+      <div class="info">
+        <div class="name">填写反馈问卷</div>
+        <div class="sub">帮助商家提升服务质量</div>
+      </div>
+      <div class="arrow">›</div>
+    </button>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <a href="#" class="active">
+    <span class="icon">🏠</span>
+    首页
+  </a>
+  <a href="#">
+    <span class="icon">🎫</span>
+    优惠券
+  </a>
+  <a href="#">
+    <span class="icon">📋</span>
+    订单
+  </a>
+  <a href="#">
+    <span class="icon">👤</span>
+    我的
+  </a>
+</div>
+
+<script>
+function showToast() {
+  var t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2000);
+}
+</script>
+</body>
+</html>

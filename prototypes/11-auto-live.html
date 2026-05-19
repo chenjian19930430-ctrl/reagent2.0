@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440, initial-scale=0.8">
+<title>ReAgent · 自动直播管理</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg-primary: #070b14; --bg-secondary: #0d1424; --bg-card: #111a2e;
+    --bg-card-hover: #162040; --bg-sidebar: #0a1120; --border: #1a2744;
+    --border-active: #2563eb; --text-primary: #e8edf5; --text-secondary: #8892a8;
+    --text-dim: #4a5568; --accent: #2563eb; --accent-glow: rgba(37,99,235,0.2);
+    --cyan: #00d4ff; --green: #22c55e; --orange: #f59e0b; --purple: #8b5cf6;
+    --pink: #ec4899; --red: #ef4444;
+    --gradient-main: linear-gradient(135deg, #2563eb, #00d4ff);
+    --shadow-card: 0 4px 24px rgba(0,0,0,0.3);
+    --radius: 12px; --radius-sm: 8px;
+  }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); display: flex; min-height: 100vh; }
+  .sidebar { width: 240px; min-width: 240px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; }
+  .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid var(--border); }
+  .sidebar-logo h1 { font-size: 20px; font-weight: 800; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .sidebar-logo span { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .sidebar-nav { padding: 16px 12px; flex: 1; overflow-y: auto; }
+  .nav-section { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); padding: 8px 12px 4px; margin-top: 12px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 14px; cursor: pointer; margin: 2px 0; }
+  .nav-item:hover { background: var(--bg-card); color: var(--text-primary); }
+  .nav-item.active { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(37,99,235,0.3); }
+  .main { flex: 1; padding: 32px; overflow-y: auto; }
+  .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+  .page-header h1 { font-size: 28px; font-weight: 700; }
+  .page-header p { color: var(--text-secondary); margin-top: 4px; font-size: 14px; }
+  .btn { padding: 8px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #1d4ed8; box-shadow: 0 0 20px var(--accent-glow); }
+  .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-red { background: #dc2626; color: white; }
+  .btn-green { background: var(--green); color: #070b14; }
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .stat-card .label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card .value { font-size: 28px; font-weight: 700; margin-top: 8px; }
+  .stat-card .change { font-size: 12px; margin-top: 4px; }
+  .stat-card .change.up { color: var(--green); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: 11px; font-weight: 500; }
+  .badge-active { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-inactive { background: rgba(100,116,139,0.15); color: #64748b; }
+  .badge-live { background: rgba(239,68,68,0.15); color: var(--red); }
+  .table { width: 100%; border-collapse: collapse; }
+  .table th { text-align: left; padding: 12px 16px; font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+  .table td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
+  .table tr:hover td { background: var(--bg-card-hover); }
+  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .tab { padding: 12px 24px; font-size: 14px; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; }
+  .tab:hover { color: var(--text-primary); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .flex { display: flex; }
+  .gap-2 { gap: 8px; }
+  .gap-4 { gap: 16px; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .mt-4 { margin-top: 16px; }
+  .mt-6 { margin-top: 24px; }
+  .mb-4 { margin-bottom: 16px; }
+  .text-secondary { color: var(--text-secondary); }
+  .text-sm { font-size: 13px; }
+  .ml-auto { margin-left: auto; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+  .sel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; color: var(--text-primary); font-size: 13px; }
+  .live-indicator { width: 8px; height: 8px; border-radius: 50%; background: var(--red); display: inline-block; margin-right: 6px; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; margin-bottom: 16px; }
+  .timeline-item::before { content: ''; position: absolute; left: -16px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg-card); }
+  .timeline-item .time { font-size: 11px; color: var(--text-dim); }
+  .timeline-item .desc { font-size: 13px; margin-top: 2px; }
+  .digital-human-card { background: var(--bg-secondary); border-radius: var(--radius-sm); padding: 16px; display: flex; gap: 16px; align-items: center; }
+  .dh-avatar { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--purple), var(--pink)); display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h1>ReAgent</h1>
+      <span>数字营销平台 v2.0</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">总览</div>
+      <a href="01-dashboard.html" class="nav-item">📊 工作台</a>
+      <a href="08-analytics.html" class="nav-item">📈 数据看板</a>
+      <div class="nav-section">内容</div>
+      <a href="02-video.html" class="nav-item">🎬 短视频创作</a>
+      <a href="07-mix.html" class="nav-item">✂️ 短视频混剪</a>
+      <a href="#" class="nav-item">✍️ AI代写文案</a>
+      <a href="03-digital-human.html" class="nav-item">👤 数字人创作</a>
+      <div class="nav-section">分发</div>
+      <a href="04-publish.html" class="nav-item">🚀 一键发布</a>
+      <a href="#" class="nav-item">⭐ 一键打卡收藏</a>
+      <div class="nav-section">线下引流</div>
+      <a href="09-nfc-cards.html" class="nav-item">📇 碰碰卡管理</a>
+      <a href="#" class="nav-item">🖥️ 互动引流设备</a>
+      <div class="nav-section">直播</div>
+      <a href="11-auto-live.html" class="nav-item active">🔴 自动直播</a>
+      <div class="nav-section">触达</div>
+      <a href="05-cs.html" class="nav-item">💬 AI客服</a>
+      <a href="06-private.html" class="nav-item">📱 私域管理</a>
+      <a href="06-search.html" class="nav-item">🔍 AI搜索曝光</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <h1>🔴 自动直播</h1>
+        <p>管理直播场次、数字人形象与自动直播编排</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn btn-outline">👤 数字人管理</button>
+        <button class="btn btn-primary">➕ 创建直播</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="label">直播中</div>
+        <div class="value" style="color: var(--red);"><span class="live-indicator"></span> 3</div>
+        <div class="change">川味火锅 · FitZone健身 · 慢时光咖啡</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">今日观看</div>
+        <div class="value" style="color: var(--cyan);">12.8K</div>
+        <div class="change up">↑ 32% 较昨日</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">今日成交</div>
+        <div class="value" style="color: var(--green);">¥8,432</div>
+        <div class="change up">↑ 18% 较昨日</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">总直播时长</div>
+        <div class="value" style="color: var(--purple);">168h</div>
+        <div class="change">本月累计</div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab active">直播列表</div>
+      <div class="tab">编排模板</div>
+      <div class="tab">数字人管理</div>
+      <div class="tab">数据看板</div>
+    </div>
+
+    <!-- Live List -->
+    <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 24px;">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>直播名称</th>
+            <th>商户</th>
+            <th>数字人</th>
+            <th>平台</th>
+            <th>状态</th>
+            <th>观看人数</th>
+            <th>时长</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="background: rgba(239,68,68,0.1); padding: 6px; border-radius: 6px; font-size: 18px;">🔴</div>
+                <div>
+                  <div style="font-weight: 500;">川味火锅·晚间特惠</div>
+                  <div style="font-size: 11px; color: var(--text-dim);">每晚 18:00-24:00</div>
+                </div>
+              </div>
+            </td>
+            <td>川味火锅旗舰店</td>
+            <td>小辣（真人克隆）</td>
+            <td><span class="badge badge-active">抖音</span> <span class="badge badge-active">视频号</span></td>
+            <td><span class="badge badge-live"><span class="live-indicator"></span>直播中</span></td>
+            <td><strong>1,284</strong></td>
+            <td>5h32m</td>
+            <td>
+              <button class="btn btn-outline" style="padding: 4px 10px; font-size: 12px;">管理</button>
+              <button class="btn btn-red" style="padding: 4px 10px; font-size: 12px;">停止</button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="background: rgba(34,197,94,0.1); padding: 6px; border-radius: 6px; font-size: 18px;">⏹️</div>
+                <div>
+                  <div style="font-weight: 500;">FitZone·晨间燃脂</div>
+                  <div style="font-size: 11px; color: var(--text-dim);">每日 07:00-09:00</div>
+                </div>
+              </div>
+            </td>
+            <td>FitZone健身中心</td>
+            <td>Coach AI（虚拟人）</td>
+            <td><span class="badge badge-active">抖音</span></td>
+            <td><span class="badge badge-active">已排期</span></td>
+            <td><strong>847</strong></td>
+            <td>2h00m</td>
+            <td><button class="btn btn-outline" style="padding: 4px 10px; font-size: 12px;">管理</button></td>
+          </tr>
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="background: rgba(245,158,11,0.1); padding: 6px; border-radius: 6px; font-size: 18px;">🔄</div>
+                <div>
+                  <div style="font-weight: 500;">慢时光·咖啡时光</div>
+                  <div style="font-size: 11px; color: var(--text-dim);">7×24h 不间断</div>
+                </div>
+              </div>
+            </td>
+            <td>慢时光咖啡</td>
+            <td>小咖（真人克隆）</td>
+            <td><span class="badge badge-active">抖音</span> <span class="badge badge-active">视频号</span></td>
+            <td><span class="badge badge-live"><span class="live-indicator"></span>直播中</span></td>
+            <td><strong>2,156</strong></td>
+            <td>24h18m</td>
+            <td>
+              <button class="btn btn-outline" style="padding: 4px 10px; font-size: 12px;">管理</button>
+              <button class="btn btn-red" style="padding: 4px 10px; font-size: 12px;">停止</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Live Configuration Cards -->
+    <div class="page-header">
+      <div><h2>🎬 直播编排</h2><p class="text-secondary">川味火锅·晚间特惠 编排配置</p></div>
+      <button class="btn btn-outline">✍️ AI生成脚本</button>
+    </div>
+
+    <div class="grid-2">
+      <!-- Timeline Config -->
+      <div class="card">
+        <div class="flex justify-between items-center mb-4">
+          <h3 style="font-size: 16px;">⏱️ 直播时间线</h3>
+          <button class="btn btn-outline" style="padding: 4px 12px; font-size: 12px;">+ 添加环节</button>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="time">00:00 - 02:00</div>
+            <div class="desc"><strong>开场暖场</strong> · AI生成欢迎语+活动预告</div>
+          </div>
+          <div class="timeline-item">
+            <div class="time">02:00 - 05:00</div>
+            <div class="desc"><strong>产品讲解 · 招牌毛肚</strong> · 优惠价¥68</div>
+          </div>
+          <div class="timeline-item">
+            <div class="time">05:00 - 07:00</div>
+            <div class="desc"><strong>互动环节</strong> · 关键词抽奖 · 送¥10券</div>
+          </div>
+          <div class="timeline-item">
+            <div class="time">07:00 - 10:00</div>
+            <div class="desc"><strong>产品讲解 · 鸳鸯锅底</strong> · 优惠价¥88</div>
+          </div>
+          <div class="timeline-item">
+            <div class="time">10:00 - 12:00</div>
+            <div class="desc"><strong>促销环节</strong> · 限时折扣 · 满200减30</div>
+          </div>
+          <div class="timeline-item">
+            <div class="time">12:00 - ...</div>
+            <div class="desc"><strong>循环播放</strong> · 从第2分钟开始循环</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Stats + Reply Config -->
+      <div class="card">
+        <h3 style="font-size: 16px; margin-bottom: 16px;">💬 自动互动配置</h3>
+        <div style="background: var(--bg-secondary); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 14px;">
+          <div class="flex justify-between items-center" style="margin-bottom: 8px;">
+            <span style="font-weight: 500;">评论区自动回复</span>
+            <span class="badge badge-active">已启用</span>
+          </div>
+          <div style="font-size: 13px; color: var(--text-secondary);">
+            <div>已配置 <strong>8</strong> 条规则</div>
+            <div style="margin-top: 4px;">今日回复 <strong>156</strong> 条评论</div>
+          </div>
+        </div>
+        <div style="background: var(--bg-secondary); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 14px;">
+          <div class="flex justify-between items-center" style="margin-bottom: 8px;">
+            <span style="font-weight: 500;">商品自动上下架</span>
+            <span class="badge badge-active">已启用</span>
+          </div>
+          <div style="font-size: 13px; color: var(--text-secondary);">
+            已配置 <strong>4</strong> 个商品 · 按时间线自动切换
+          </div>
+        </div>
+        <h3 style="font-size: 16px; margin: 20px 0 12px;">📊 实时数据</h3>
+        <div class="grid-2">
+          <div style="background: var(--bg-secondary); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+            <div style="font-size: 11px; color: var(--text-dim);">当前在线</div>
+            <div style="font-size: 24px; font-weight: 700; color: var(--cyan);">128</div>
+          </div>
+          <div style="background: var(--bg-secondary); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+            <div style="font-size: 11px; color: var(--text-dim);">互动率</div>
+            <div style="font-size: 24px; font-weight: 700; color: var(--green);">12.4%</div>
+          </div>
+          <div style="background: var(--bg-secondary); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+            <div style="font-size: 11px; color: var(--text-dim);">成交订单</div>
+            <div style="font-size: 24px; font-weight: 700; color: var(--orange);">23</div>
+          </div>
+          <div style="background: var(--bg-secondary); border-radius: var(--radius-sm); padding: 14px; text-align: center;">
+            <div style="font-size: 11px; color: var(--text-dim);">成交额</div>
+            <div style="font-size: 24px; font-weight: 700; color: var(--purple);">¥1,856</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Digital Human Management -->
+    <div class="page-header" style="margin-top: 40px;">
+      <div><h2>👤 数字人管理</h2><p class="text-secondary">管理数字人形象，支持真人克隆/虚拟人生成</p></div>
+      <button class="btn btn-primary">+ 创建数字人</button>
+    </div>
+
+    <div class="grid-3">
+      <div class="digital-human-card">
+        <div class="dh-avatar">👩</div>
+        <div>
+          <div style="font-weight: 500;">小辣</div>
+          <div style="font-size: 12px; color: var(--text-secondary);">真人克隆 · LivePortrait</div>
+          <div style="font-size: 12px; color: var(--text-dim);">已录制 28 条口播</div>
+        </div>
+      </div>
+      <div class="digital-human-card">
+        <div class="dh-avatar">👨</div>
+        <div>
+          <div style="font-weight: 500;">Coach AI</div>
+          <div style="font-size: 12px; color: var(--text-secondary);">虚拟人 · Duix</div>
+          <div style="font-size: 12px; color: var(--text-dim);">支持运动场景</div>
+        </div>
+      </div>
+      <div class="digital-human-card">
+        <div class="dh-avatar">👩‍🦰</div>
+        <div>
+          <div style="font-weight: 500;">小咖</div>
+          <div style="font-size: 12px; color: var(--text-secondary);">真人克隆 · LivePortrait</div>
+          <div style="font-size: 12px; color: var(--text-dim);">已录制 15 条口播</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

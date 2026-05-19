@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440, initial-scale=0.8">
+<title>ReAgent · 一键打卡收藏</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg-primary: #070b14; --bg-secondary: #0d1424; --bg-card: #111a2e;
+    --bg-card-hover: #162040; --bg-sidebar: #0a1120; --border: #1a2744;
+    --text-primary: #e8edf5; --text-secondary: #8892a8; --text-dim: #4a5568;
+    --accent: #2563eb; --accent-glow: rgba(37,99,235,0.2);
+    --cyan: #00d4ff; --green: #22c55e; --orange: #f59e0b; --purple: #8b5cf6;
+    --pink: #ec4899;
+    --gradient-main: linear-gradient(135deg, #2563eb, #00d4ff);
+    --shadow-card: 0 4px 24px rgba(0,0,0,0.3);
+    --radius: 12px; --radius-sm: 8px;
+  }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); display: flex; min-height: 100vh; }
+  .sidebar { width: 240px; min-width: 240px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; }
+  .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid var(--border); }
+  .sidebar-logo h1 { font-size: 20px; font-weight: 800; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .sidebar-logo span { font-size: 11px; color: var(--text-dim); }
+  .sidebar-nav { padding: 16px 12px; flex: 1; overflow-y: auto; }
+  .nav-section { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); padding: 8px 12px 4px; margin-top: 12px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 14px; cursor: pointer; margin: 2px 0; }
+  .nav-item:hover { background: var(--bg-card); color: var(--text-primary); }
+  .nav-item.active { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(37,99,235,0.3); }
+  .main { flex: 1; padding: 32px; overflow-y: auto; }
+  .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+  .page-header h1 { font-size: 28px; font-weight: 700; }
+  .page-header p { color: var(--text-secondary); margin-top: 4px; font-size: 14px; }
+  .btn { padding: 8px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #1d4ed8; box-shadow: 0 0 20px var(--accent-glow); }
+  .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .stat-card .label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-card .value { font-size: 28px; font-weight: 700; margin-top: 8px; }
+  .stat-card .change { font-size: 12px; margin-top: 4px; }
+  .stat-card .change.up { color: var(--green); }
+  .table { width: 100%; border-collapse: collapse; }
+  .table th { text-align: left; padding: 12px 16px; font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+  .table td { padding: 14px 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
+  .table tr:hover td { background: var(--bg-card-hover); }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: 11px; font-weight: 500; }
+  .badge-active { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-inactive { background: rgba(100,116,139,0.15); color: #64748b; }
+  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .tab { padding: 12px 24px; font-size: 14px; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; }
+  .tab:hover { color: var(--text-primary); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .flex { display: flex; }
+  .gap-2 { gap: 8px; }
+  .gap-4 { gap: 16px; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .mt-4 { margin-top: 16px; }
+  .text-secondary { color: var(--text-secondary); }
+  .text-sm { font-size: 13px; }
+  .ml-auto { margin-left: auto; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+  .sel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; color: var(--text-primary); font-size: 13px; }
+  .platform-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+</style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h1>ReAgent</h1>
+      <span>数字营销平台 v2.0</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">总览</div>
+      <a href="01-dashboard.html" class="nav-item">📊 工作台</a>
+      <a href="08-analytics.html" class="nav-item">📈 数据看板</a>
+      <div class="nav-section">内容</div>
+      <a href="02-video.html" class="nav-item">🎬 短视频创作</a>
+      <a href="07-mix.html" class="nav-item">✂️ 短视频混剪</a>
+      <a href="#" class="nav-item">✍️ AI代写文案</a>
+      <a href="03-digital-human.html" class="nav-item">👤 数字人创作</a>
+      <div class="nav-section">分发</div>
+      <a href="04-publish.html" class="nav-item">🚀 一键发布</a>
+      <a href="12-checkin.html" class="nav-item active">⭐ 一键打卡收藏</a>
+      <div class="nav-section">线下引流</div>
+      <a href="09-nfc-cards.html" class="nav-item">📇 碰碰卡管理</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <h1>⭐ 一键打卡收藏</h1>
+        <p>配置各平台打卡收藏规则，用户碰触发自动引导打卡</p>
+      </div>
+      <button class="btn btn-primary">➕ 新增打卡配置</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="label">今日打卡数</div>
+        <div class="value" style="color: var(--accent);">1,284</div>
+        <div class="change up">↑ 18.5% 较昨日</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">已配置商户</div>
+        <div class="value" style="color: var(--cyan);">36</div>
+        <div class="change">覆盖 4 个平台</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">平均完成率</div>
+        <div class="value" style="color: var(--green);">82.3%</div>
+        <div class="change up">↑ 3.2% 较上周</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">平台覆盖</div>
+        <div class="value" style="color: var(--purple);">4/4</div>
+        <div class="change">大众/抖音/高德/百度</div>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab active">打卡配置</div>
+      <div class="tab">打卡记录</div>
+      <div class="tab">数据统计</div>
+    </div>
+
+    <!-- Platform Coverage -->
+    <div class="grid-4" style="margin-bottom: 24px;">
+      <div class="card" style="text-align: center; padding: 20px;">
+        <div class="platform-icon" style="background: #ffe4e6; margin: 0 auto 8px;">🍜</div>
+        <div style="font-weight: 600;">大众点评</div>
+        <div class="text-secondary text-sm">打卡签到</div>
+        <div style="margin-top: 8px;"><span class="badge badge-active">已对接</span></div>
+        <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">Deep Link 跳转</div>
+      </div>
+      <div class="card" style="text-align: center; padding: 20px;">
+        <div class="platform-icon" style="background: #dbeafe; margin: 0 auto 8px;">🎵</div>
+        <div style="font-weight: 600;">抖音</div>
+        <div class="text-secondary text-sm">打卡收藏</div>
+        <div style="margin-top: 8px;"><span class="badge badge-active">已对接</span></div>
+        <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">开放平台API</div>
+      </div>
+      <div class="card" style="text-align: center; padding: 20px;">
+        <div class="platform-icon" style="background: #fef3c7; margin: 0 auto 8px;">🗺️</div>
+        <div style="font-weight: 600;">高德地图</div>
+        <div class="text-secondary text-sm">收藏店铺</div>
+        <div style="margin-top: 8px;"><span class="badge badge-active">已对接</span></div>
+        <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">商户中心API</div>
+      </div>
+      <div class="card" style="text-align: center; padding: 20px;">
+        <div class="platform-icon" style="background: #dcfce7; margin: 0 auto 8px;">📍</div>
+        <div style="font-weight: 600;">百度地图</div>
+        <div class="text-secondary text-sm">收藏打卡</div>
+        <div style="margin-top: 8px;"><span class="badge badge-active">已对接</span></div>
+        <div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">商户中心API</div>
+      </div>
+    </div>
+
+    <!-- Config Table -->
+    <div class="card" style="padding: 0; overflow: hidden;">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>商户名称</th>
+            <th>大众点评</th>
+            <th>抖音</th>
+            <th>高德</th>
+            <th>百度</th>
+            <th>关联碰碰卡</th>
+            <th>状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>川味火锅旗舰店</strong></td>
+            <td><span class="badge badge-active">✅ 已配置</span></td>
+            <td><span class="badge badge-active">✅ 已配置</span></td>
+            <td><span class="badge badge-active">✅ 已配置</span></td>
+            <td><span class="badge badge-active">✅ 已配置</span></td>
+            <td>card_hj_001</td>
+            <td><span class="badge badge-active">已激活</span></td>
+            <td><button class="btn btn-outline" style="padding: 4px 10px; font-size: 12px;">编辑</button></td>
+          </tr>
+          <tr>
+            <td><strong>慢时光咖啡</strong></td>
+            <td><span class="badge badge-active">✅ 已配置</span></td>
+            <td><span class="badge badge-inactive">⏳ 待配置</span></td>
+            <td><span class="badge badge-active">✅ 已配置</span></td>
+            <td><span class="badge badge-inactive">⏳ 待配置</span></td>
+            <td>card_cf_002</td>
+            <td><span class="badge badge-active">已激活</span></td>
+            <td><button class="btn btn-outline" style="padding: 4px 10px; font-size: 12px;">编辑</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- How It Works -->
+    <div class="page-header" style="margin-top: 40px;">
+      <div><h2>⚙️ 打卡流程配置</h2><p class="text-secondary">配置用户碰触打卡触发的跳转流程</p></div>
+    </div>
+
+    <div class="card">
+      <div style="display: flex; gap: 16px; align-items: flex-start;">
+        <div style="flex: 1; padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-sm);">
+          <div style="font-weight: 600; margin-bottom: 12px;">一键打卡跳转顺序</div>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <span class="badge badge-active" style="font-size: 13px; padding: 6px 12px;">1. 大众点评</span>
+            <span style="color: var(--text-dim);">→</span>
+            <span class="badge badge-active" style="font-size: 13px; padding: 6px 12px;">2. 抖音</span>
+            <span style="color: var(--text-dim);">→</span>
+            <span class="badge badge-active" style="font-size: 13px; padding: 6px 12px;">3. 高德</span>
+            <span style="color: var(--text-dim);">→</span>
+            <span class="badge badge-active" style="font-size: 13px; padding: 6px 12px;">4. 百度</span>
+            <button class="btn btn-outline" style="padding: 4px 10px; font-size: 12px;">调整顺序</button>
+          </div>
+        </div>
+        <div style="flex: 1; padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-sm);">
+          <div style="font-weight: 600; margin-bottom: 12px;">用户完成条件</div>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 6px;">
+            <input type="radio" name="condition" checked /> 逐平台跳转完成
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 6px;">
+            <input type="radio" name="condition" /> 任意1个打卡完成
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+            <input type="radio" name="condition" /> 用户自主选择平台
+          </label>
+        </div>
+      </div>
+      <div style="margin-top: 16px; padding: 12px; background: rgba(37,99,235,0.05); border-radius: var(--radius-sm); border: 1px solid rgba(37,99,235,0.15);">
+        <div style="font-size: 13px; color: var(--text-secondary);">
+          💡 <strong>打卡逻辑：</strong>用户碰触碰碰卡 → NFC路由解析 → CheckinAgent分派 → 按顺序通过Deep Link跳转各平台打卡页 → 完成后记录打卡成功
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440, initial-scale=0.8">
+<title>ReAgent · AI代写文案</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg-primary: #070b14; --bg-secondary: #0d1424; --bg-card: #111a2e;
+    --bg-card-hover: #162040; --bg-sidebar: #0a1120; --border: #1a2744;
+    --text-primary: #e8edf5; --text-secondary: #8892a8; --text-dim: #4a5568;
+    --accent: #2563eb; --accent-glow: rgba(37,99,235,0.2);
+    --cyan: #00d4ff; --green: #22c55e; --orange: #f59e0b; --purple: #8b5cf6;
+    --gradient-main: linear-gradient(135deg, #2563eb, #00d4ff);
+    --radius: 12px; --radius-sm: 8px;
+  }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); display: flex; min-height: 100vh; }
+  .sidebar { width: 240px; min-width: 240px; background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; }
+  .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid var(--border); }
+  .sidebar-logo h1 { font-size: 20px; font-weight: 800; background: var(--gradient-main); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .sidebar-nav { padding: 16px 12px; flex: 1; overflow-y: auto; }
+  .nav-section { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); padding: 8px 12px 4px; margin-top: 12px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); color: var(--text-secondary); font-size: 14px; cursor: pointer; margin: 2px 0; }
+  .nav-item:hover { background: var(--bg-card); color: var(--text-primary); }
+  .nav-item.active { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(37,99,235,0.3); }
+  .main { flex: 1; padding: 32px; overflow-y: auto; }
+  .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+  .page-header h1 { font-size: 28px; font-weight: 700; }
+  .page-header p { color: var(--text-secondary); margin-top: 4px; }
+  .btn { padding: 8px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-outline { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+  .flex { display: flex; }
+  .gap-2 { gap: 8px; }
+  .gap-4 { gap: 16px; }
+  .items-center { align-items: center; }
+  .justify-between { justify-content: space-between; }
+  .mb-4 { margin-bottom: 16px; }
+  .text-secondary { color: var(--text-secondary); }
+  .text-sm { font-size: 13px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: 11px; }
+  .badge-douyin { background: rgba(0,0,0,0.2); color: #fff; }
+  .badge-xhs { background: rgba(255,69,0,0.15); color: #ff4500; }
+  .badge-ks { background: rgba(255,165,0,0.15); color: #ffa500; }
+  .badge-sph { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .sel { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; color: var(--text-primary); }
+  textarea { width: 100%; padding: 14px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 14px; min-height: 120px; resize: vertical; }
+</style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-logo"><h1>ReAgent</h1><span>数字营销平台 v2.0</span></div>
+    <div class="sidebar-nav">
+      <div class="nav-section">总览</div>
+      <a href="01-dashboard.html" class="nav-item">📊 工作台</a>
+      <div class="nav-section">内容</div>
+      <a href="02-video.html" class="nav-item">🎬 短视频创作</a>
+      <a href="07-mix.html" class="nav-item">✂️ 短视频混剪</a>
+      <a href="13-ai-copywriting.html" class="nav-item active">✍️ AI代写文案</a>
+      <a href="03-digital-human.html" class="nav-item">👤 数字人创作</a>
+      <div class="nav-section">分发</div>
+      <a href="04-publish.html" class="nav-item">🚀 一键发布</a>
+      <div class="nav-section">线下引流</div>
+      <a href="09-nfc-cards.html" class="nav-item">📇 碰碰卡管理</a>
+      <div class="nav-section">直播</div>
+      <a href="11-auto-live.html" class="nav-item">🔴 自动直播</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="page-header">
+      <div>
+        <h1>✍️ AI代写文案</h1>
+        <p>输入产品/活动主题，AI自动生成多平台适配营销文案</p>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="font-size: 16px; margin-bottom: 16px;">📝 输入需求</h3>
+        <div style="margin-bottom: 12px;">
+          <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 4px;">产品/活动主题</label>
+          <input style="width: 100%; padding: 10px 14px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary);" placeholder="例如：川味火锅新品·秘制牛油锅底" />
+        </div>
+        <div style="margin-bottom: 12px;">
+          <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 4px;">关键卖点（可选）</label>
+          <textarea placeholder="每行一个卖点，例如：&#10;正宗重庆牛油锅底&#10;每日现熬8小时&#10;开业至今口碑第一&#10;周二半价"></textarea>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+          <label style="display: flex; align-items: center; gap: 4px; font-size: 13px; cursor: pointer;">
+            <input type="checkbox" checked /> 抖音（15s）
+          </label>
+          <label style="display: flex; align-items: center; gap: 4px; font-size: 13px; cursor: pointer;">
+            <input type="checkbox" checked /> 小红书（图文）
+          </label>
+          <label style="display: flex; align-items: center; gap: 4px; font-size: 13px; cursor: pointer;">
+            <input type="checkbox" /> 快手（30s）
+          </label>
+          <label style="display: flex; align-items: center; gap: 4px; font-size: 13px; cursor: pointer;">
+            <input type="checkbox" /> 视频号
+          </label>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 4px;">语气风格</label>
+          <select class="sel" style="width: 100%;">
+            <option>热情活泼</option>
+            <option>专业权威</option>
+            <option>幽默风趣</option>
+            <option>文艺清新</option>
+            <option>种草推荐</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" style="width: 100%; justify-content: center;">✨ AI生成文案</button>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 16px; margin-bottom: 16px;">📄 生成结果</h3>
+        <!-- Platform tabs -->
+        <div class="flex gap-2 mb-4" style="flex-wrap: wrap;">
+          <button class="btn btn-outline" style="font-size: 12px; padding: 6px 14px;">🎵 抖音</button>
+          <button class="btn btn-primary" style="font-size: 12px; padding: 6px 14px;">📕 小红书</button>
+          <button class="btn btn-outline" style="font-size: 12px; padding: 6px 14px;">🎬 快手</button>
+          <button class="btn btn-outline" style="font-size: 12px; padding: 6px 14px;">📱 视频号</button>
+        </div>
+        <div style="background: var(--bg-secondary); border-radius: var(--radius-sm); padding: 16px; min-height: 200px;">
+          <div style="color: var(--text-dim); text-align: center; padding: 40px 0;">点击「AI生成文案」开始生成</div>
+        </div>
+        <div class="flex gap-2" style="margin-top: 16px;">
+          <button class="btn btn-outline">📋 复制</button>
+          <button class="btn btn-outline">🔄 继续优化</button>
+          <button class="btn btn-outline">🚀 一键生成视频</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="card" style="margin-top: 24px;">
+      <h3 style="font-size: 16px; margin-bottom: 16px;">📋 历史记录</h3>
+      <table class="table" style="width: 100%;">
+        <thead><tr><th>主题</th><th>平台</th><th>生成时间</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr><td>川味火锅新品·秘制牛油锅底</td><td><span class="badge badge-douyin">抖音</span> <span class="badge badge-xhs">小红书</span></td><td>2026-05-19 20:30</td><td><button class="btn btn-outline" style="padding: 4px 10px; font-size: 12px;">查看</button></td></tr>
+          <tr><td>FitZone健身·夏季燃脂课程</td><td><span class="badge badge-douyin">抖音</span> <span class="badge badge-ks">快手</span></td><td>2026-05-19 19:15</td><td><button class="btn btn-outline" style="padding: 4px 10px; font-size: 12px;">查看</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>
